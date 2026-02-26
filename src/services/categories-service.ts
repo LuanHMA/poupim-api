@@ -9,18 +9,18 @@ export class CategoriesService {
         return categories
     }
 
-    async create({ name, userId }: CategoryCreate) {
-        await db.execute<ResultSetHeader>("INSERT INTO categories (name, user_id) VALUES (?, ?)", [name, userId])
+    async create({ name, userId, type }: CategoryCreate) {
+        await db.execute<ResultSetHeader>("INSERT INTO categories (name, user_id, type) VALUES (?, ?, ?)", [name, userId, type])
     }
 
-    async update({ name, id, userId }: CategoryUpdate) {
+    async update({ name, id, userId, type }: CategoryUpdate) {
         const [categories] = await db.execute<RowDataPacket[]>("SELECT * FROM categories WHERE id = ? AND user_id = ?", [id, userId])
 
         if (categories.length === 0) {
             throw new NotFoundError("Não existe nenhuma categoria com esse ID")
         }
 
-        await db.execute<ResultSetHeader>("UPDATE categories SET name = ? WHERE id = ?", [name, id])
+        await db.execute<ResultSetHeader>("UPDATE categories SET name = ?, type = ? WHERE id = ?", [name, type, id])
     }
 
     async delete({ id, userId }: CategoryDelete) {

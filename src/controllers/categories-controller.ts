@@ -29,12 +29,14 @@ export class CategoriesController {
             name: z
                 .string("Insira um nome válido")
                 .max(100, "Máximo de caracteres excedido")
-                .min(1, "O nome da categoria é obrigatório")
+                .min(1, "O nome da categoria é obrigatório"),
+            type: z
+                .enum(["INCOME", "EXPENSE"], "Insira um type válido")
         })
 
-        const { name } = bodySchema.parse(request.body)
+        const { name, type } = bodySchema.parse(request.body)
 
-        await this.categoriesService.create({ name, userId })
+        await this.categoriesService.create({ name, userId, type })
 
         return reply.status(201).send({ message: "Categoria criada com sucesso!" })
     }
@@ -54,11 +56,13 @@ export class CategoriesController {
             categoryId: z
                 .number("Insira um ID válido")
                 .min(1, "O ID é obrigátorio"),
+            type: z
+                .enum(["INCOME", "EXPENSE"], "Insira um type válido")
         })
 
-        const { name, categoryId } = bodySchema.parse(request.body)
+        const { name, categoryId, type } = bodySchema.parse(request.body)
 
-        await this.categoriesService.update({ name, userId, id: categoryId })
+        await this.categoriesService.update({ name, userId, id: categoryId, type })
 
         return reply.status(200).send({ message: "Categoria atualizada com sucesso!" })
     }
