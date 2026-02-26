@@ -48,10 +48,6 @@ export class AuthController {
     async me(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
 
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
-
         const user = await this.authService.getUser(user_id)
 
         return reply.status(200).send({ message: "Usuário encontrado com sucesso", success: true, user })

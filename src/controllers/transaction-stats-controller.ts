@@ -1,5 +1,4 @@
 import { FastifyRequest, FastifyReply } from "fastify"
-import { UnauthorizedError } from "../errors/domain-errors"
 import z from "zod"
 import { TransactionsStatsService } from "../services/transactions-stats-service"
 
@@ -9,21 +8,19 @@ export class TransactionStatsController {
     async getTransactionsSummary(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
 
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
-
-        const paramsSchema = z.object({
+        const querySchema = z.object({
             month: z
-                .number("Insira um mês válido")
+                .coerce.number("Insira um mês válido")
                 .optional()
                 .refine((value) => value && value >= 1 && value <= 12, "O mês deve estar entre 1 e 12"),
             year: z
-                .number("Insira um ano valido")
+                .coerce.number("Insira um ano valido")
                 .optional()
         })
 
-        const { month, year } = paramsSchema.parse(request.params)
+        const { month, year } = querySchema.parse(request.query)
+
+        console.log(month, year)
 
         const summary = await this.transactionStatsService.getTransactionsSummary({
             month: month ?? new Date().getMonth() + 1,

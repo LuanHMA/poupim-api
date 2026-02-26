@@ -14,6 +14,10 @@ export class TransactionsStatsService {
         `
 
         const [transactionsSummary] = await db.execute<RowDataPacket[]>(query, [user_id, month, year])
-        return transactionsSummary[0]
+        return {
+            total_income: transactionsSummary[0].total_income ?? 0,
+            total_expense: transactionsSummary[0].total_expense ?? 0,
+            balance: transactionsSummary[0].balance ?? 0
+        }
     }
 }

@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { TransactionsService } from "../services/transactions-service";
-import { UnauthorizedError } from "../errors/domain-errors";
 import z from "zod";
 
 export class TransactionsController {
@@ -9,10 +8,6 @@ export class TransactionsController {
     async getAll(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
 
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
-
         const transactions = await this.transactionService.getAll(user_id)
 
         return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions })
@@ -20,10 +15,6 @@ export class TransactionsController {
 
     async create(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const bodySchema = z.object({
             description: z
@@ -54,10 +45,6 @@ export class TransactionsController {
 
     async update(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const bodySchema = z.object({
             description: z
@@ -94,10 +81,6 @@ export class TransactionsController {
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const bodySchema = z.object({
             transactionId: z

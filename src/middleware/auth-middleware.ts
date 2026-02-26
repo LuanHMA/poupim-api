@@ -4,7 +4,7 @@ import { verifyToken } from "../utils/jwt";
 
 declare module "fastify" {
     export interface FastifyRequest {
-        user_id?: number
+        user_id: number
     }
 }
 

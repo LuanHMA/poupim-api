@@ -1,17 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import z from "zod";
 import { CategoriesService } from "../services/categories-service";
-import { UnauthorizedError } from "../errors/domain-errors";
 
 export class CategoriesController {
     private categoriesService = new CategoriesService()
 
     async getAll(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const categories = await this.categoriesService.getAll(user_id)
 
@@ -20,10 +15,6 @@ export class CategoriesController {
 
     async create(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const bodySchema = z.object({
             name: z
@@ -43,10 +34,6 @@ export class CategoriesController {
 
     async update(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const bodySchema = z.object({
             name: z
@@ -69,10 +56,6 @@ export class CategoriesController {
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request
-
-        if (!user_id) {
-            throw new UnauthorizedError()
-        }
 
         const bodySchema = z.object({
             category_id: z
