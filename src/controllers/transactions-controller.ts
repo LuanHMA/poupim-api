@@ -7,21 +7,21 @@ export class TransactionsController {
     private transactionService = new TransactionsService()
 
     async getAll(request: FastifyRequest, reply: FastifyReply) {
-        const { userId } = request
+        const { user_id } = request
 
-        if (!userId) {
+        if (!user_id) {
             throw new UnauthorizedError()
         }
 
-        const transactions = await this.transactionService.getAll(userId)
+        const transactions = await this.transactionService.getAll(user_id)
 
         return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions })
     }
 
     async create(request: FastifyRequest, reply: FastifyReply) {
-        const { userId } = request
+        const { user_id } = request
 
-        if (!userId) {
+        if (!user_id) {
             throw new UnauthorizedError()
         }
 
@@ -29,8 +29,8 @@ export class TransactionsController {
             description: z
                 .string("Insira uma descrição válida")
                 .min(1, "A descrição é obrigatória"),
-            categoryId: z
-                .number("Insira um categoryId válido")
+            category_id: z
+                .number("Insira um category_id válido")
                 .min(1, "A categoria é obrigatória"),
             amount: z
                 .number("Insira um amount válido")
@@ -39,23 +39,23 @@ export class TransactionsController {
                 .enum(["INCOME", "EXPENSE"], "Insira um type válido")
         })
 
-        const { description, categoryId, amount, type } = bodySchema.parse(request.body)
+        const { description, category_id, amount, type } = bodySchema.parse(request.body)
 
         await this.transactionService.create({
             amount,
-            category_id: categoryId,
+            category_id: category_id,
             description,
             type,
-            userId
+            user_id
         })
 
         return reply.status(201).send({ message: "Transação criada com sucesso", success: true })
     }
 
     async update(request: FastifyRequest, reply: FastifyReply) {
-        const { userId } = request
+        const { user_id } = request
 
-        if (!userId) {
+        if (!user_id) {
             throw new UnauthorizedError()
         }
 
@@ -63,8 +63,8 @@ export class TransactionsController {
             description: z
                 .string("Insira uma descrição válida")
                 .min(1, "A descrição é obrigatória"),
-            categoryId: z
-                .number("Insira um categoryId válido")
+            category_id: z
+                .number("Insira um category_id válido")
                 .min(1, "A categoria é obrigatória"),
             amount: z
                 .number("Insira um amount válido")
@@ -76,14 +76,14 @@ export class TransactionsController {
                 .min(1, "O id é obrigatório")
         })
 
-        const { description, categoryId, amount, type, transactionId } = bodySchema.parse(request.body)
+        const { description, category_id, amount, type, transactionId } = bodySchema.parse(request.body)
 
         await this.transactionService.update({
             id: transactionId,
-            userId,
+            user_id,
             transaction: {
                 amount,
-                category_id: categoryId,
+                category_id: category_id,
                 description,
                 type
             }
@@ -93,9 +93,9 @@ export class TransactionsController {
     }
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
-        const { userId } = request
+        const { user_id } = request
 
-        if (!userId) {
+        if (!user_id) {
             throw new UnauthorizedError()
         }
 
@@ -107,7 +107,7 @@ export class TransactionsController {
 
         const { transactionId } = bodySchema.parse(request.body)
 
-        await this.transactionService.delete({ id: transactionId, userId })
+        await this.transactionService.delete({ id: transactionId, user_id })
 
         return reply.status(200).send({ message: "Transação deletada com sucesso!" })
     }

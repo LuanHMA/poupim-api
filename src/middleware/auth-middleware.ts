@@ -4,7 +4,7 @@ import { verifyToken } from "../utils/jwt";
 
 declare module "fastify" {
     export interface FastifyRequest {
-        userId?: number
+        user_id?: number
     }
 }
 
@@ -27,7 +27,7 @@ export async function AuthMiddleware(request: FastifyRequest, reply: FastifyRepl
         throw new UnauthorizedError("Token de autenticação não segue o formato Bearer");
     }
 
-    const { userId } = verifyToken(token)
+    const { user_id } = verifyToken(token)
 
-    request.userId = userId
+    request.user_id = user_id
 }

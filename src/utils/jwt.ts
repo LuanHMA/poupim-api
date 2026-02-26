@@ -12,7 +12,7 @@ export function verifyToken(token: string) {
     const { id } = jwt.verify(token, env.JWT_SECRET) as { id: number }
 
     return {
-        userId: id
+        user_id: id
     }
 
 }

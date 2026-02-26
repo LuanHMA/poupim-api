@@ -2,12 +2,12 @@ export interface Categories {
     id: number
     name: string
     created_at: string
-    userId: number
+    user_id: number
     type: "INCOME" | "EXPENSE"
 }
 
 export type CategoryCreate = Omit<Categories, "id" | "created_at">
 
-export type CategoryDelete = Pick<Categories, "id" | "userId">
+export type CategoryDelete = Pick<Categories, "id" | "user_id">
 
-export type CategoryUpdate = Pick<Categories, "id" | "name" | "userId" | 'type'>
+export type CategoryUpdate = Pick<Categories, "id" | "name" | "user_id" | 'type'>
