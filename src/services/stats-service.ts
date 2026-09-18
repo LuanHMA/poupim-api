@@ -1,29 +1,28 @@
-import { RowDataPacket } from "mysql2/promise"
-import { db } from "../config/database"
 import { BasesStats, CategoryStats, CreateStats, TransactionSummary } from "../models/stats"
+import { StatsRepository } from "../repository/stats-repository"
 
 export class StatsService {
-    async getTransactionsSummary({ month, year, user_id }: CreateStats): Promise<TransactionSummary> {
-        // Retorna o resumo das transações: total de receitas, total de despesas e saldo
-        const query = `
-            SELECT 
-                SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END) AS total_income,
-                SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END) AS total_expense,
-                SUM(CASE WHEN type = 'INCOME' THEN amount ELSE -amount END) AS balance
-            FROM transactions
-            WHERE user_id = ? AND MONTH(created_at) = ? AND YEAR (created_at) = ?
-        `
+    constructor(private statsRepository: StatsRepository) {}
 
-        const [transactionsSummary] = await db.execute<RowDataPacket[]>(query, [user_id, month, year])
+    async getTransactionsSummary({ month, year, user_id }: CreateStats): Promise<TransactionSummary> {
+        const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
+
+        const total_income = transactions.reduce((acc, item) => {
+            return item.type === "INCOME" ? acc + item.amount : acc
+        }, 0)
+
+        const total_expense = transactions.reduce((acc, item) => {
+            return item.type === "EXPENSE" ? acc + item.amount : acc
+        }, 0)
+
         return {
-            total_income: transactionsSummary[0].total_income ?? 0,
-            total_expense: transactionsSummary[0].total_expense ?? 0,
-            balance: transactionsSummary[0].balance ?? 0
+            total_income,
+            total_expense,
+            balance: total_income - total_expense,
         }
     }
 
     async getOverview({ month, year, user_id }: CreateStats) {
-        // Retorna um overview completo das transações
         const [basesStats, categoryStats] = await Promise.all([
             this.getBasesStats({ month, year, user_id }),
             this.getCategoryStats({ month, year, user_id }),
@@ -44,63 +43,49 @@ export class StatsService {
     }
 
     private async getBasesStats({ month, year, user_id }: CreateStats): Promise<BasesStats> {
-        const query = `
-            SELECT 
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense,
-                SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) AS balance,
-                count(*) AS transactions_total,
-                MAX(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS highest_expense
-            FROM transactions   
-            wHERE user_id = ? AND MONTH(created_at) = ? AND YEAR (created_at) = ?
-        `
+        const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
 
-        const [basesStats] = await db.execute<RowDataPacket[]>(query, [user_id, month, year])
+        const total_income = transactions.reduce((acc, item) => {
+            return item.type === "INCOME" ? acc + item.amount : acc
+        }, 0)
 
+        const expenses = transactions
+            .filter((item) => item.type === "EXPENSE")
+            .map((item) => item.amount)
+
+        const total_expense = expenses.reduce((acc, amount) => acc + amount, 0)
         const daysInMonth = new Date(year, month, 0).getDate()
-
-        const average_daily_expense = daysInMonth > 0 ? Number((basesStats[0].total_expense / daysInMonth).toFixed(2)) : 0
+        const average_daily_expense = daysInMonth > 0 ? Number((total_expense / daysInMonth).toFixed(2)) : 0
 
         return {
-            total_income: basesStats[0].total_income ?? 0,
-            total_expense: basesStats[0].total_expense ?? 0,
-            balance: basesStats[0].balance ?? 0,
-            transactions_total: basesStats[0].transactions_total ?? 0,
-            highest_expense: basesStats[0].highest_expense ?? 0,
-            average_daily_expense
+            total_income,
+            total_expense,
+            balance: total_income - total_expense,
+            transactions_total: transactions.length,
+            highest_expense: expenses.length > 0 ? Math.max(...expenses) : 0,
+            average_daily_expense,
         }
     }
 
     private async getCategoryStats({ month, year, user_id }: CreateStats): Promise<CategoryStats[]> {
-        const query = `
-            SELECT 
-                c.name AS category,
-                sum(t.amount) AS total_amount
-            FROM transactions t
-            JOIN categories c ON t.category_id = c.id
-            WHERE t.user_id = ? AND MONTH(t.created_at) = ? AND YEAR(t.created_at) = ?
-            GROUP BY c.name;
-        `
+        const transactions = await this.statsRepository.findAmountsByCategoryAndPeriod({ month, year, user_id })
 
-        const [rows] = await db.execute<RowDataPacket[]>(query, [user_id, month, year])
+        const totalsByCategory = new Map<string, number>()
 
-        const totalExpense = rows.reduce((acc, curr) => {
-            return acc + Number(curr.total_amount)
-        }, 0)
+        for (const item of transactions) {
+            const current = totalsByCategory.get(item.category) ?? 0
+            totalsByCategory.set(item.category, current + item.amount)
+        }
 
-        const categoryStats = rows.map((item) => {
-            const total = Number(item.total_amount)
+        const totalExpense = [...totalsByCategory.values()].reduce((acc, amount) => acc + amount, 0)
 
-            return {
-                category: item.category,
-                total_amount: total,
-                percentage: totalExpense > 0
-                    ? Number(((total / totalExpense) * 100).toFixed(2))
-                    : 0
-            }
-        })
-
-        return categoryStats as CategoryStats[]
+        return [...totalsByCategory.entries()].map(([category, total_amount]) => ({
+            category,
+            total_amount,
+            percentage: totalExpense > 0
+                ? Number(((total_amount / totalExpense) * 100).toFixed(2))
+                : 0,
+        }))
     }
 
     private generateInsights(
@@ -113,10 +98,6 @@ export class StatsService {
 
         const daysInMonth = new Date(year, month, 0).getDate()
 
-        /* 
-           🥇 Percentual da renda usada
-           (total_expense / total_income) * 100
-        */
         const expenseRatio =
             total_income > 0
                 ? Number(((total_expense / total_income) * 100).toFixed(2))
@@ -129,16 +110,9 @@ export class StatsService {
                     ? "neutral"
                     : "warning"
 
-        /*
-           🥈 Resultado do mês
-           balance = income - expense
-        */
         const savingsType =
             balance > 0 ? "positive" : balance < 0 ? "warning" : "neutral"
 
-        /*
-           🥉 Maior categoria de gasto
-        */
         const topCategory =
             categoryStats.length > 0
                 ? categoryStats.reduce((prev, current) =>
@@ -146,10 +120,6 @@ export class StatsService {
                 )
                 : null
 
-        /*
-           🏅 Frequência de movimentações
-           transactions_total / daysInMonth
-        */
         const transactionsPerDay =
             daysInMonth > 0
                 ? Number((transactions_total / daysInMonth).toFixed(2))
@@ -162,9 +132,6 @@ export class StatsService {
                     ? "positive"
                     : "neutral"
 
-        /*
-           🎯 Média diária de gasto
-        */
         const averageDailySpending = Number(
             average_daily_expense.toFixed(2)
         )
@@ -175,7 +142,6 @@ export class StatsService {
                 question: "Eu economizei ou gastei mais do que ganhei? (R$)",
                 type: savingsType,
                 value: balance
-                //Você conseguiu guardar R$ X este mês.
             },
 
             expenseRatio: {
@@ -183,8 +149,6 @@ export class StatsService {
                 question: "Quanto da minha renda eu utilizei este mês? (%)",
                 type: expenseRatioType,
                 value: expenseRatio
-                //Você utilizou X% do que ganhou este mês.
-                //Quase toda a sua renda foi consumida este mês (X%).
             },
 
             topExpenseCategory: topCategory
@@ -196,7 +160,6 @@ export class StatsService {
                     value: topCategory.total_amount
                 }
                 : null,
-            //Seu maior gasto foi com {categoria}, totalizando R$ X.
 
             spendingFrequency: {
                 id: "spendingFrequency",
@@ -204,8 +167,6 @@ export class StatsService {
                 type: spendingFrequencyType,
                 total_transactions: transactions_total,
                 transactions_per_day: transactionsPerDay
-                //Você realizou X movimentações este mês.
-                //Em média, você movimentou seu dinheiro X vezes por dia.
             },
 
             averageDailySpending: {
@@ -213,7 +174,6 @@ export class StatsService {
                 question: "Quanto eu gasto por dia, em média? (R$)",
                 type: "info",
                 value: averageDailySpending
-                //Em média, você gastou R$ X por dia neste mês.
             },
         }
     }

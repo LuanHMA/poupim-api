@@ -1,55 +1,62 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { db } from "../config/database";
-import { TransactionCreate, TransactionDelete, Transactions, TransactionUpdate } from "../models/transactions";
 import { NotFoundError } from "../errors/domain-errors";
+import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "../models/transactions";
+import { CategoriesRepository } from "../repository/categories-repository";
+import { TransactionsRepository } from "../repository/transactions-repository";
 
 export class TransactionsService {
-    async getAll(user_id: Transactions["user_id"]) {
-        const query = `
-            SELECT 
-                t.id,
-                t.description,
-                t.amount,
-                t.type,
-                c.name AS category_name,
-                t.created_at
-            FROM transactions t
-            INNER JOIN categories c ON c.id = t.category_id
-            WHERE t.user_id = ?
-        `
+    constructor(
+        private transactionsRepository: TransactionsRepository,
+        private categoriesRepository: CategoriesRepository,
+    ) {}
 
-        const [transactions] = await db.execute<RowDataPacket[]>(query, [user_id])
-
-        return transactions
+    async getAll(user_id: Transaction["user_id"]) {
+        return this.transactionsRepository.findAllByUserId(user_id)
     }
 
     async create({ amount, category_id, description, type, user_id }: TransactionCreate) {
-        await db.execute<ResultSetHeader>(
-            "INSERT INTO transactions (amount, category_id, description, type, user_id) VALUES(?,?,?,?,?)",
-            [amount, category_id, description, type, user_id]
-        )
+        const category = await this.categoriesRepository.findByIdAndUserId({ id: category_id, user_id })
+
+        if (!category) {
+            throw new NotFoundError("Não existe nenhuma categoria com esse ID")
+        }
+
+        await this.transactionsRepository.create({
+            amount,
+            category_id,
+            description,
+            type,
+            user_id,
+        })
     }
 
-    async update({ user_id, id, transaction }: { user_id: Transactions["user_id"], id: Transactions["id"], transaction: TransactionUpdate }) {
-        const [transacations] = await db.execute<RowDataPacket[]>("SELECT * FROM transactions WHERE id = ? AND user_id = ?", [id, user_id])
+    async update({ user_id, id, transaction }: { user_id: Transaction["user_id"], id: Transaction["id"], transaction: TransactionUpdate }) {
+        const existing = await this.transactionsRepository.findByIdAndUserId({ id, user_id })
 
-        if (transacations.length === 0) {
+        if (!existing) {
             throw new NotFoundError("Não existe nenhuma transação com esse ID")
         }
 
-        const fields = Object.keys(transaction).map(key => `${key} = ?`).join(', ');
-        const values = Object.values(transaction);
+        if (transaction.category_id) {
+            const category = await this.categoriesRepository.findByIdAndUserId({
+                id: transaction.category_id,
+                user_id,
+            })
 
-        await db.execute<ResultSetHeader>(`UPDATE transactions SET ${fields} WHERE id = ?`, [...values, id])
+            if (!category) {
+                throw new NotFoundError("Não existe nenhuma categoria com esse ID")
+            }
+        }
+
+        await this.transactionsRepository.update({ id, data: transaction })
     }
 
     async delete({ id, user_id }: TransactionDelete) {
-        const [transactions] = await db.execute<RowDataPacket[]>("SELECT * FROM transactions WHERE id = ? AND user_id = ?", [id, user_id])
+        const transaction = await this.transactionsRepository.findByIdAndUserId({ id, user_id })
 
-        if (transactions.length === 0) {
+        if (!transaction) {
             throw new NotFoundError("Não existe nenhuma transação com esse ID")
         }
 
-        await db.execute<ResultSetHeader>('DELETE FROM transactions WHERE id = ?', [id])
+        await this.transactionsRepository.delete(id)
     }
 }

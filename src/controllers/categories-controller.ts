@@ -3,7 +3,7 @@ import z from "zod";
 import { CategoriesService } from "../services/categories-service";
 
 export class CategoriesController {
-    private categoriesService = new CategoriesService()
+    constructor(private categoriesService: CategoriesService) {}
 
     async getAll(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request

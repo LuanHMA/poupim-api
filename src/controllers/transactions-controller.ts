@@ -3,7 +3,7 @@ import { TransactionsService } from "../services/transactions-service";
 import z from "zod";
 
 export class TransactionsController {
-    private transactionService = new TransactionsService()
+    constructor(private transactionService: TransactionsService) {}
 
     async getAll(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request

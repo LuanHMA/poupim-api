@@ -1,34 +1,24 @@
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { db } from "../config/database";
-import { UserCreate, UserLogin, Users } from "../models/users";
-import { BadRequestError, ConflictError, NotFoundError } from "../errors/domain-errors";
 import { hash, compare } from "bcrypt"
+import { BadRequestError, NotFoundError } from "../errors/domain-errors";
+import { User, UserCreate, UserLogin } from "../models/users";
+import { AuthRepository } from "../repository/auth-repository";
 
 export class AuthService {
+    constructor(private authRepository: AuthRepository) {}
+
     async register({ email, name, password }: UserCreate) {
-        const [users] = await db.execute<RowDataPacket[]>("SELECT * FROM users WHERE email = ?", [email])
-
-        if (users.length > 0) {
-            throw new ConflictError("Já existe um usuário cadastrado com esse e-mail!")
-        }
-
         const passwordHash = await hash(password, 10)
+        const user = await this.authRepository.create({ email, name, password: passwordHash })
 
-        const result = await db.execute<ResultSetHeader>("INSERT INTO users (email, name, password) VALUES (?,?,?)", [email, name, passwordHash])
-
-        return {
-            id: result[0].insertId
-        }
+        return { id: user.id }
     }
 
     async login({ email, password }: UserLogin) {
-        const [users] = await db.execute<RowDataPacket[]>("SELECT * FROM users WHERE email = ?", [email])
+        const user = await this.authRepository.findByEmail(email)
 
-        if (users.length === 0) {
+        if (!user) {
             throw new NotFoundError("Nenhum usuário cadastrado com essas credenciais!")
         }
-
-        const user = users[0] as Users
 
         const passwordIsCorrect = await compare(password, user.password)
 
@@ -41,13 +31,13 @@ export class AuthService {
         }
     }
 
-    async getUser(id: Users["id"]) {
-        const [users] = await db.execute<RowDataPacket[]>("SELECT id, name, created_at, email FROM users WHERE id = ?", [id])
+    async getUser(id: User["id"]) {
+        const user = await this.authRepository.findById(id)
 
-        if (users.length === 0) {
+        if (!user) {
             throw new NotFoundError("Usuário não encontrado")
         }
 
-        return users[0] as Users
+        return user
     }
 }

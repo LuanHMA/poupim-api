@@ -1,10 +1,7 @@
-export interface Users {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-}
+import { User } from "../config/generated/prisma/client"
 
-export type UserCreate = Omit<Users, 'id'>
+export type { User }
 
-export type UserLogin = Pick<Users, "email" | "password">
+export type UserCreate = Omit<User, "id" | "created_at">
+
+export type UserLogin = Pick<User, "email" | "password">

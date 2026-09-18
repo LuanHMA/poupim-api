@@ -1,15 +1,15 @@
-export interface Transactions {
-    id: number;
-    description: string
-    amount: number;
-    type: "INCOME" | "EXPENSE";
-    category_id: number;
-    user_id: number;
-    created_at: string
-}
+import { Prisma, Transaction } from "../config/generated/prisma/client"
 
-export type TransactionCreate = Omit<Transactions, "id" | "created_at">
+export type { Transaction }
 
-export type TransactionUpdate = Omit<Transactions, "created_at" | "id" | "user_id">
+export type TransactionCreate = Pick<
+    Prisma.TransactionUncheckedCreateInput,
+    "amount" | "category_id" | "description" | "type" | "user_id"
+>
 
-export type TransactionDelete = Pick<Transactions, "id" | "user_id">
+export type TransactionUpdate = Pick<
+    Prisma.TransactionUncheckedCreateInput,
+    "amount" | "category_id" | "description" | "type"
+>
+
+export type TransactionDelete = Pick<Transaction, "id" | "user_id">

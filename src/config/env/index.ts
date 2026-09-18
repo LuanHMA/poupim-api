@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-	MYSQL_HOST: z.string().min(1, 'MYSQL_HOST é obrigatório'),
-	MYSQL_USER: z.string().min(1, 'MYSQL_USER é obrigatório'),
-	MYSQL_PASSWORD: z.string().min(1, 'MYSQL_PASSWORD é obrigatório'),
-	MYSQL_DATABASE: z.string().min(1, 'MYSQL_DATABASE é obrigatório'),
+	DATABASE_URL: z.string().min(1, 'DATABASE_URL é obrigatório'),
 	JWT_SECRET: z.string().min(1, 'JWT_SECRET é obrigatório'),
 });
 

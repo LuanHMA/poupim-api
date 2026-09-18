@@ -1,13 +1,9 @@
-export interface Categories {
-    id: number
-    name: string
-    created_at: string
-    user_id: number
-    type: "INCOME" | "EXPENSE"
-}
+import { Category } from "../config/generated/prisma/client"
 
-export type CategoryCreate = Omit<Categories, "id" | "created_at">
+export type { Category }
 
-export type CategoryDelete = Pick<Categories, "id" | "user_id">
+export type CategoryCreate = Omit<Category, "id" | "created_at">
 
-export type CategoryUpdate = Pick<Categories, "id" | "name" | "user_id" | 'type'>
+export type CategoryDelete = Pick<Category, "id" | "user_id">
+
+export type CategoryUpdate = Pick<Category, "id" | "name" | "user_id" | "type">

@@ -4,6 +4,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui"
 import "dotenv/config"
 import fastify from "fastify"
 import { env } from "./config/env"
+import { prisma } from "./config/prisma"
 import { healthSchema } from "./docs/route-schemas"
 import { swaggerOptions, swaggerUiOptions } from "./docs/swagger"
 import { globalErrorHandler } from "./errors/global-error"
@@ -38,6 +39,10 @@ app.register(categoriesRoutes, { prefix: "/api/category" })
 app.register(transactionsRoutes, { prefix: "/api/transactions" })
 app.register(authRoutes, { prefix: "/api/auth" })
 app.register(statsRoutes, { prefix: "/api/stats" })
+
+app.addHook("onClose", async () => {
+    await prisma.$disconnect()
+})
 
 app.listen({
     port: 3000,

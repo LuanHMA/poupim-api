@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
+import { Prisma } from "../config/generated/prisma/client";
 import { DomainError } from "./domain-errors.js";
 
 interface ErrorResponse {
@@ -61,6 +62,35 @@ export function globalErrorHandler(error: Error, request: FastifyRequest, reply:
             message: jwtMessage,
         };
         request.log.warn(`[JWT ERROR] ${jwtCode}: ${error.message}`);
+    }
+
+    else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        let prismaMessage = "Erro de banco de dados.";
+        let prismaStatus = 400;
+
+        switch (error.code) {
+            case "P2002":
+                prismaMessage = "Já existe um registro com esse valor";
+                prismaStatus = 409;
+                break;
+            case "P2003":
+            case "P2014":
+                prismaMessage = "Violação de chave estrangeira.";
+                prismaStatus = 409;
+                break;
+            case "P2025":
+                prismaMessage = "Registro não encontrado.";
+                prismaStatus = 404;
+                break;
+            default:
+                prismaMessage = error.message || "Erro de banco de dados.";
+        }
+
+        statusCode = prismaStatus;
+        responseBody = {
+            message: prismaMessage,
+        };
+        request.log.error(`[PRISMA ERROR] ${error.code}: ${error.message}`);
     }
 
     // Validação de erros SQL do mysql2

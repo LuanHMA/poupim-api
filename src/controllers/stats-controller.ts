@@ -3,7 +3,7 @@ import z from "zod"
 import { StatsService } from "../services/stats-service"
 
 export class StatsController {
-    private statsService = new StatsService()
+    constructor(private statsService: StatsService) {}
 
     async getTransactionsSummary(request: FastifyRequest, reply: FastifyReply) {
         const { user_id } = request

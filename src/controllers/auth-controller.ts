@@ -3,7 +3,7 @@ import z from "zod";
 import { AuthService } from "../services/auth-service";
 
 export class AuthController {
-    private authService = new AuthService()
+    constructor(private authService: AuthService) {}
 
     async register(request: FastifyRequest, reply: FastifyReply) {
         const bodySchema = z.object({
