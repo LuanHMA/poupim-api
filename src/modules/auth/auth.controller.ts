@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import z from "zod";
-import { AuthService } from "../services/auth-service";
+import { AuthService } from "./auth.service";
 
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService) { }
 
     async register(request: FastifyRequest, reply: FastifyReply) {
         const bodySchema = z.object({
@@ -47,9 +47,9 @@ export class AuthController {
     }
 
     async me(request: FastifyRequest, reply: FastifyReply) {
-        const { user_id } = request
+        const { id } = request.user
 
-        const user = await this.authService.getUser(user_id)
+        const user = await this.authService.getUser({ id })
 
         return reply.status(200).send({ message: "Usuário encontrado com sucesso", success: true, user })
     }

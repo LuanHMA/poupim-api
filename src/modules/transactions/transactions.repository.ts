@@ -1,9 +1,9 @@
-import { prisma } from "../config/prisma";
-import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "../models/transactions";
-import { toAmount } from "../utils/to-amount";
+import { prisma } from "../../config/prisma";
+import { toAmount } from "../../utils/to-amount";
+import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "./transactions.contracts";
 
 export class TransactionsRepository {
-    async findAllByUserId(user_id: Transaction["user_id"]) {
+    async findAllByUserId({ user_id }: Pick<Transaction, "user_id">) {
         const transactions = await prisma.transaction.findMany({
             where: { user_id },
             select: {
@@ -23,7 +23,7 @@ export class TransactionsRepository {
             description: transaction.description,
             amount: toAmount(transaction.amount),
             type: transaction.type,
-            category_name: transaction.category.name,
+            category_name: transaction.category?.name ?? null,
             created_at: transaction.created_at,
         }))
     }
@@ -53,7 +53,7 @@ export class TransactionsRepository {
         })
     }
 
-    async delete(id: Transaction["id"]) {
+    async delete({ id }: Pick<Transaction, "id">) {
         await prisma.transaction.delete({
             where: { id },
         })

@@ -1,4 +1,4 @@
-import { Prisma, Transaction } from "../config/generated/prisma/client"
+import { Prisma, Transaction } from "../../config/generated/prisma/client"
 
 export type { Transaction }
 

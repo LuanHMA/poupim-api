@@ -1,7 +1,7 @@
-import { NotFoundError } from "../errors/domain-errors";
-import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "../models/transactions";
-import { CategoriesRepository } from "../repository/categories-repository";
-import { TransactionsRepository } from "../repository/transactions-repository";
+import { NotFoundError } from "../../errors/domain-errors";
+import { CategoriesRepository } from "../categories/categories.repository";
+import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "./transactions.contracts";
+import { TransactionsRepository } from "./transactions.repository";
 
 export class TransactionsService {
     constructor(
@@ -9,8 +9,8 @@ export class TransactionsService {
         private categoriesRepository: CategoriesRepository,
     ) {}
 
-    async getAll(user_id: Transaction["user_id"]) {
-        return this.transactionsRepository.findAllByUserId(user_id)
+    async getAll({ user_id }: Pick<Transaction, "user_id">) {
+        return this.transactionsRepository.findAllByUserId({ user_id })
     }
 
     async create({ amount, category_id, description, type, user_id }: TransactionCreate) {
@@ -57,6 +57,6 @@ export class TransactionsService {
             throw new NotFoundError("Não existe nenhuma transação com esse ID")
         }
 
-        await this.transactionsRepository.delete(id)
+        await this.transactionsRepository.delete({ id })
     }
 }

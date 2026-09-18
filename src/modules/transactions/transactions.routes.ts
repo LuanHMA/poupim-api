@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { TransactionsController } from "../controllers/transactions-controller";
-import { createTransactionSchema, deleteTransactionSchema, listTransactionsSchema, updateTransactionSchema } from "../docs/route-schemas";
-import { AuthMiddleware } from "../middleware/auth-middleware";
-import { CategoriesRepository } from "../repository/categories-repository";
-import { TransactionsRepository } from "../repository/transactions-repository";
-import { TransactionsService } from "../services/transactions-service";
+import { createTransactionSchema, deleteTransactionSchema, listTransactionsSchema, updateTransactionSchema } from "../../docs/route-schemas";
+import { AuthMiddleware } from "../../middleware/auth-middleware";
+import { CategoriesRepository } from "../categories/categories.repository";
+import { TransactionsController } from "./transactions.controller";
+import { TransactionsRepository } from "./transactions.repository";
+import { TransactionsService } from "./transactions.service";
 
 export async function transactionsRoutes(app: FastifyInstance) {
     const transactionController = new TransactionsController(

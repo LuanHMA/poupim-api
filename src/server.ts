@@ -8,10 +8,7 @@ import { prisma } from "./config/prisma"
 import { healthSchema } from "./docs/route-schemas"
 import { swaggerOptions, swaggerUiOptions } from "./docs/swagger"
 import { globalErrorHandler } from "./errors/global-error"
-import { authRoutes } from "./routes/auth-routes"
-import { categoriesRoutes } from "./routes/categories-routes"
-import { statsRoutes } from "./routes/stats"
-import { transactionsRoutes } from "./routes/transactions-routes"
+import { routes } from "./modules"
 
 const app = fastify()
 
@@ -35,10 +32,7 @@ app.register(async (app) => {
     })
 })
 
-app.register(categoriesRoutes, { prefix: "/api/category" })
-app.register(transactionsRoutes, { prefix: "/api/transactions" })
-app.register(authRoutes, { prefix: "/api/auth" })
-app.register(statsRoutes, { prefix: "/api/stats" })
+app.register(routes, { prefix: "/api" })
 
 app.addHook("onClose", async () => {
     await prisma.$disconnect()

@@ -1,9 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { AuthController } from "../controllers/auth-controller";
-import { loginSchema, meSchema, registerSchema } from "../docs/route-schemas";
-import { AuthMiddleware } from "../middleware/auth-middleware";
-import { AuthRepository } from "../repository/auth-repository";
-import { AuthService } from "../services/auth-service";
+import { loginSchema, meSchema, registerSchema } from "../../docs/route-schemas";
+import { AuthMiddleware } from "../../middleware/auth-middleware";
+import { AuthController } from "./auth.controller";
+import { AuthRepository } from "./auth.repository";
+import { AuthService } from "./auth.service";
 
 export async function authRoutes(app: FastifyInstance) {
     const authController = new AuthController(

@@ -1,12 +1,12 @@
-import { NotFoundError } from "../errors/domain-errors";
-import { Category, CategoryCreate, CategoryDelete, CategoryUpdate } from "../models/categories";
-import { CategoriesRepository } from "../repository/categories-repository";
+import { NotFoundError } from "../../errors/domain-errors";
+import { Category, CategoryCreate, CategoryDelete, CategoryUpdate } from "./categories.contracts";
+import { CategoriesRepository } from "./categories.repository";
 
 export class CategoriesService {
     constructor(private categoriesRepository: CategoriesRepository) {}
 
-    async getAll(user_id: Category["user_id"]) {
-        return this.categoriesRepository.findAllByUserId(user_id)
+    async getAll({ user_id }: Pick<Category, "user_id">) {
+        return this.categoriesRepository.findAllByUserId({ user_id })
     }
 
     async create({ name, user_id, type }: CategoryCreate) {
@@ -30,6 +30,6 @@ export class CategoriesService {
             throw new NotFoundError("Não existe nenhuma categoria com esse ID")
         }
 
-        await this.categoriesRepository.delete(id)
+        await this.categoriesRepository.delete({ id })
     }
 }

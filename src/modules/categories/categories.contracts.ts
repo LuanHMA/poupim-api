@@ -1,4 +1,4 @@
-import { Category } from "../config/generated/prisma/client"
+import { Category } from "../../config/generated/prisma/client"
 
 export type { Category }
 

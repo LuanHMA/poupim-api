@@ -7,13 +7,6 @@ declare module "@fastify/jwt" {
     }
 }
 
-declare module "fastify" {
-    export interface FastifyRequest {
-        user_id: number
-    }
-}
-
 export async function AuthMiddleware(request: FastifyRequest, _reply: FastifyReply) {
     await request.jwtVerify()
-    request.user_id = request.user.id
 }

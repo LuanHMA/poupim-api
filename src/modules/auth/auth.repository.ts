@@ -1,7 +1,7 @@
-import { prisma } from "../config/prisma";
-import { Prisma } from "../config/generated/prisma/client";
-import { ConflictError } from "../errors/domain-errors";
-import { User, UserCreate } from "../models/users";
+import { Prisma } from "../../config/generated/prisma/client";
+import { prisma } from "../../config/prisma";
+import { ConflictError } from "../../errors/domain-errors";
+import { User, UserCreate } from "./auth.contracts";
 
 export class AuthRepository {
     async create({ email, name, password }: UserCreate) {
@@ -19,13 +19,13 @@ export class AuthRepository {
         }
     }
 
-    async findByEmail(email: User["email"]) {
+    async findByEmail({ email }: Pick<User, "email">) {
         return prisma.user.findUnique({
             where: { email },
         })
     }
 
-    async findById(id: User["id"]) {
+    async findById({ id }: Pick<User, "id">) {
         return prisma.user.findUnique({
             where: { id },
             select: {

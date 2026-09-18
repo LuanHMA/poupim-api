@@ -1,9 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { CategoriesController } from '../controllers/categories-controller';
-import { createCategorySchema, deleteCategorySchema, listCategoriesSchema, updateCategorySchema } from "../docs/route-schemas";
-import { AuthMiddleware } from '../middleware/auth-middleware';
-import { CategoriesRepository } from "../repository/categories-repository";
-import { CategoriesService } from "../services/categories-service";
+import { createCategorySchema, deleteCategorySchema, listCategoriesSchema, updateCategorySchema } from "../../docs/route-schemas";
+import { AuthMiddleware } from "../../middleware/auth-middleware";
+import { CategoriesController } from "./categories.controller";
+import { CategoriesRepository } from "./categories.repository";
+import { CategoriesService } from "./categories.service";
 
 export async function categoriesRoutes(app: FastifyInstance) {
     const categoriesController = new CategoriesController(

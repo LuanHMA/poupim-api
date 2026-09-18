@@ -1,5 +1,5 @@
-import { BasesStats, CategoryStats, CreateStats, TransactionSummary } from "../models/stats"
-import { StatsRepository } from "../repository/stats-repository"
+import { BasesStats, CategoryStats, CreateStats, TransactionSummary } from "./stats.contracts"
+import { StatsRepository } from "./stats.repository"
 
 export class StatsService {
     constructor(private statsRepository: StatsRepository) {}

@@ -1,7 +1,7 @@
-import { hash, compare } from "bcrypt"
-import { BadRequestError, NotFoundError } from "../errors/domain-errors";
-import { User, UserCreate, UserLogin } from "../models/users";
-import { AuthRepository } from "../repository/auth-repository";
+import { compare, hash } from "bcrypt";
+import { BadRequestError, NotFoundError } from "../../errors/domain-errors";
+import { User, UserCreate, UserLogin } from "./auth.contracts";
+import { AuthRepository } from "./auth.repository";
 
 export class AuthService {
     constructor(private authRepository: AuthRepository) {}
@@ -14,7 +14,7 @@ export class AuthService {
     }
 
     async login({ email, password }: UserLogin) {
-        const user = await this.authRepository.findByEmail(email)
+        const user = await this.authRepository.findByEmail({ email })
 
         if (!user) {
             throw new NotFoundError("Nenhum usuário cadastrado com essas credenciais!")
@@ -31,8 +31,8 @@ export class AuthService {
         }
     }
 
-    async getUser(id: User["id"]) {
-        const user = await this.authRepository.findById(id)
+    async getUser({ id }: Pick<User, "id">) {
+        const user = await this.authRepository.findById({ id })
 
         if (!user) {
             throw new NotFoundError("Usuário não encontrado")

@@ -1,7 +1,7 @@
-import { prisma } from "../config/prisma"
-import { CreateStats } from "../models/stats"
-import { monthRange } from "../utils/month-range"
-import { toAmount } from "../utils/to-amount"
+import { prisma } from "../../config/prisma"
+import { monthRange } from "../../utils/month-range"
+import { toAmount } from "../../utils/to-amount"
+import { CreateStats } from "./stats.contracts"
 
 export class StatsRepository {
     async findAmountsByPeriod({ month, year, user_id }: CreateStats) {

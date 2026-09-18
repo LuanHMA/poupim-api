@@ -1,20 +1,20 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { TransactionsService } from "../services/transactions-service";
 import z from "zod";
+import { TransactionsService } from "./transactions.service";
 
 export class TransactionsController {
     constructor(private transactionService: TransactionsService) {}
 
     async getAll(request: FastifyRequest, reply: FastifyReply) {
-        const { user_id } = request
+        const { id } = request.user
 
-        const transactions = await this.transactionService.getAll(user_id)
+        const transactions = await this.transactionService.getAll({ user_id: id })
 
         return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions })
     }
 
     async create(request: FastifyRequest, reply: FastifyReply) {
-        const { user_id } = request
+        const { id } = request.user
 
         const bodySchema = z.object({
             description: z
@@ -34,17 +34,17 @@ export class TransactionsController {
 
         await this.transactionService.create({
             amount,
-            category_id: category_id,
+            category_id,
             description,
             type,
-            user_id
+            user_id: id
         })
 
         return reply.status(201).send({ message: "Transação criada com sucesso", success: true })
     }
 
     async update(request: FastifyRequest, reply: FastifyReply) {
-        const { user_id } = request
+        const { id } = request.user
 
         const bodySchema = z.object({
             description: z
@@ -67,10 +67,10 @@ export class TransactionsController {
 
         await this.transactionService.update({
             id: transactionId,
-            user_id,
+            user_id: id,
             transaction: {
                 amount,
-                category_id: category_id,
+                category_id,
                 description,
                 type
             }
@@ -80,7 +80,7 @@ export class TransactionsController {
     }
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
-        const { user_id } = request
+        const { id } = request.user
 
         const bodySchema = z.object({
             transactionId: z
@@ -90,7 +90,7 @@ export class TransactionsController {
 
         const { transactionId } = bodySchema.parse(request.body)
 
-        await this.transactionService.delete({ id: transactionId, user_id })
+        await this.transactionService.delete({ id: transactionId, user_id: id })
 
         return reply.status(200).send({ message: "Transação deletada com sucesso!" })
     }

@@ -1,4 +1,4 @@
-import { User } from "../config/generated/prisma/client"
+import { User } from "../../config/generated/prisma/client"
 
 export type { User }
 

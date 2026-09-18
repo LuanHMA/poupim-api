@@ -1,10 +1,10 @@
-import { prisma } from "../config/prisma";
-import { Prisma } from "../config/generated/prisma/client";
-import { ConflictError } from "../errors/domain-errors";
-import { Category, CategoryCreate, CategoryDelete, CategoryUpdate } from "../models/categories";
+import { Prisma } from "../../config/generated/prisma/client";
+import { prisma } from "../../config/prisma";
+import { ConflictError } from "../../errors/domain-errors";
+import { Category, CategoryCreate, CategoryDelete, CategoryUpdate } from "./categories.contracts";
 
 export class CategoriesRepository {
-    async findAllByUserId(user_id: Category["user_id"]) {
+    async findAllByUserId({ user_id }: Pick<Category, "user_id">) {
         return prisma.category.findMany({
             where: { user_id },
         })
@@ -29,7 +29,7 @@ export class CategoriesRepository {
         })
     }
 
-    async delete(id: Category["id"]) {
+    async delete({ id }: Pick<Category, "id">) {
         try {
             await prisma.category.delete({
                 where: { id },
