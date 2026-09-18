@@ -3,7 +3,6 @@ import { db } from "../config/database";
 import { UserCreate, UserLogin, Users } from "../models/users";
 import { BadRequestError, ConflictError, NotFoundError } from "../errors/domain-errors";
 import { hash, compare } from "bcrypt"
-import { generateToken } from "../utils/jwt";
 
 export class AuthService {
     async register({ email, name, password }: UserCreate) {
@@ -17,10 +16,8 @@ export class AuthService {
 
         const result = await db.execute<ResultSetHeader>("INSERT INTO users (email, name, password) VALUES (?,?,?)", [email, name, passwordHash])
 
-        const { token } = generateToken(result[0].insertId)
-
         return {
-            token
+            id: result[0].insertId
         }
     }
 
@@ -39,10 +36,8 @@ export class AuthService {
             throw new BadRequestError("Credenciais Inválidas")
         }
 
-        const { token } = generateToken(user.id)
-
         return {
-            token
+            id: user.id
         }
     }
 

@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
 import { DomainError } from "./domain-errors.js";
-import { JsonWebTokenError } from "jsonwebtoken";
 
 interface ErrorResponse {
     message: string;
@@ -38,31 +37,30 @@ export function globalErrorHandler(error: Error, request: FastifyRequest, reply:
         request.log.info(`[VALIDATION ERROR] Zod: ${JSON.stringify(zodDetails)}`);
     }
 
-    else if (error instanceof JsonWebTokenError) {
+    else if (typeof (error as Error & { code?: string }).code === "string" && (error as Error & { code: string }).code.startsWith("FST_JWT_")) {
+        const jwtCode = (error as Error & { code: string }).code;
         let jwtMessage = "Token inválido.";
-        let jwtStatus = 401;
 
-        switch (error.message) {
-            case "invalid signature":
-                jwtMessage = "Assinatura do token inválida.";
+        switch (jwtCode) {
+            case "FST_JWT_NO_AUTHORIZATION_IN_HEADER":
+            case "FST_JWT_NO_AUTHORIZATION_IN_COOKIE":
+                jwtMessage = "Token de autenticação não fornecido";
                 break;
-            case "jwt expired":
+            case "FST_JWT_AUTHORIZATION_TOKEN_EXPIRED":
                 jwtMessage = "Token expirado.";
                 break;
-            case "jwt malformed":
-                jwtMessage = "Token malformado.";
-                break;
-            case "invalid token":
+            case "FST_JWT_AUTHORIZATION_TOKEN_INVALID":
                 jwtMessage = "Token inválido.";
                 break;
             default:
                 jwtMessage = error.message || "Token inválido.";
         }
-        statusCode = jwtStatus;
+
+        statusCode = 401;
         responseBody = {
             message: jwtMessage,
         };
-        request.log.warn(`[JWT ERROR] ${error.message}`);
+        request.log.warn(`[JWT ERROR] ${jwtCode}: ${error.message}`);
     }
 
     // Validação de erros SQL do mysql2

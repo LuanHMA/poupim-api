@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import z, { success } from "zod";
+import z from "zod";
 import { AuthService } from "../services/auth-service";
-import { UnauthorizedError } from "../errors/domain-errors";
 
 export class AuthController {
     private authService = new AuthService()
@@ -22,7 +21,8 @@ export class AuthController {
 
         const body = bodySchema.parse(request.body)
 
-        const { token } = await this.authService.register(body)
+        const { id } = await this.authService.register(body)
+        const token = await reply.jwtSign({ id })
 
         return reply.status(201).send({ message: "Usuário criado com sucesso!", success: true, token })
     }
@@ -40,7 +40,8 @@ export class AuthController {
 
         const body = bodySchema.parse(request.body)
 
-        const { token } = await this.authService.login(body)
+        const { id } = await this.authService.login(body)
+        const token = await reply.jwtSign({ id })
 
         return reply.status(200).send({ message: "Usuário logado com sucesso", success: true, token })
     }
