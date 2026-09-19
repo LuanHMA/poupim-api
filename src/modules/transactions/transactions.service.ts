@@ -22,9 +22,19 @@ export class TransactionsService {
         return this.transactionsRepository.findAllByUserId({ user_id, date })
     }
 
-    async create({ date, observation, ...transaction }: TransactionsCreateInput): Promise<TransactionsCreateOutput> {
+    async create({ user_id, date, observation, ...transaction }: TransactionsCreateInput): Promise<TransactionsCreateOutput> {
+        const category = await this.categoriesRepository.findByIdAndUserId({
+            id: transaction.category_id,
+            user_id,
+        })
+
+        if (!category) {
+            throw new NotFoundError("Não existe nenhuma categoria com esse ID")
+        }
+
         await this.transactionsRepository.create({
             ...transaction,
+            user_id,
             month: date.getMonth() + 1,
             year: date.getFullYear(),
             observation: observation ?? "",
