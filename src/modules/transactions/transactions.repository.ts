@@ -26,6 +26,12 @@ export class TransactionsRepository {
                 category: {
                     select: { name: true },
                 },
+                month: true,
+                year: true,
+                status: true,
+                ignore: true,
+                fixed: true,
+                observation: true,
             },
         })
 
@@ -36,6 +42,12 @@ export class TransactionsRepository {
             type: transaction.type,
             category_name: transaction.category?.name ?? null,
             created_at: transaction.created_at,
+            month: transaction.month,
+            year: transaction.year,
+            status: transaction.status,
+            ignore: transaction.ignore,
+            fixed: transaction.fixed,
+            observation: transaction.observation,
         }))
     }
 
