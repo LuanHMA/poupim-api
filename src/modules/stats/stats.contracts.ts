@@ -1,8 +1,12 @@
+import { Transaction } from "../../config/generated/prisma/client"
+
 export type StatsGetTransactionsSummaryInput = {
-    month: number
-    year: number
-    user_id: number
+    month: Transaction["month"]
+    year: Transaction["year"]
+    user_id: Transaction["user_id"]
 }
+
+export type StatsFindByPeriodData = Pick<Transaction, "month" | "year" | "user_id">
 
 export type StatsGetTransactionsSummaryOutput = {
     total_income: number
@@ -11,9 +15,9 @@ export type StatsGetTransactionsSummaryOutput = {
 }
 
 export type StatsGetOverviewInput = {
-    month: number
-    year: number
-    user_id: number
+    month: Transaction["month"]
+    year: Transaction["year"]
+    user_id: Transaction["user_id"]
 }
 
 export type StatsGetBasesStatsInput = StatsGetOverviewInput

@@ -29,7 +29,10 @@ export class CategoriesService {
             throw new NotFoundError("Não existe nenhuma categoria com esse ID")
         }
 
-        await this.categoriesRepository.update({ id, name, icon, color })
+        await this.categoriesRepository.update({
+            id,
+            data: { name, icon, color },
+        })
     }
 
     async delete({ id, user_id }: CategoriesDeleteInput): Promise<CategoriesDeleteOutput> {

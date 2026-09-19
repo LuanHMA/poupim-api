@@ -2,6 +2,20 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import z from "zod";
 import { CategoriesService } from "./categories.service";
 
+const categoryBodySchema = z.object({
+    name: z
+        .string("Insira um nome válido")
+        .max(100, "Máximo de caracteres excedido")
+        .min(1, "O nome da categoria é obrigatório"),
+    icon: z
+        .string("Insira um ícone válido")
+        .max(64, "Máximo de caracteres excedido")
+        .min(1, "O ícone da categoria é obrigatório"),
+    color: z
+        .string("Insira uma cor válida")
+        .regex(/^#[0-9A-Fa-f]{6}$/, "A cor deve estar no formato hexadecimal (#RRGGBB)"),
+})
+
 export class CategoriesController {
     constructor(private categoriesService: CategoriesService) { }
 
@@ -16,21 +30,7 @@ export class CategoriesController {
     async create(request: FastifyRequest, reply: FastifyReply) {
         const { id } = request.user
 
-        const bodySchema = z.object({
-            name: z
-                .string("Insira um nome válido")
-                .max(100, "Máximo de caracteres excedido")
-                .min(1, "O nome da categoria é obrigatório"),
-            icon: z
-                .string("Insira um ícone válido")
-                .max(64, "Máximo de caracteres excedido")
-                .min(1, "O ícone da categoria é obrigatório"),
-            color: z
-                .string("Insira uma cor válida")
-                .regex(/^#[0-9A-Fa-f]{6}$/, "A cor deve estar no formato hexadecimal (#RRGGBB)"),
-        })
-
-        const { name, icon, color } = bodySchema.parse(request.body)
+        const { name, icon, color } = categoryBodySchema.parse(request.body)
 
         await this.categoriesService.create({ name, icon, color, user_id: id })
 
@@ -44,22 +44,8 @@ export class CategoriesController {
             id: z.coerce.number("Insira um ID válido").min(1, "O ID é obrigatório"),
         })
 
-        const bodySchema = z.object({
-            name: z
-                .string("Insira um nome válido")
-                .max(100, "Máximo de caracteres excedido")
-                .min(1, "O nome da categoria é obrigatório"),
-            icon: z
-                .string("Insira um ícone válido")
-                .max(64, "Máximo de caracteres excedido")
-                .min(1, "O ícone da categoria é obrigatório"),
-            color: z
-                .string("Insira uma cor válida")
-                .regex(/^#[0-9A-Fa-f]{6}$/, "A cor deve estar no formato hexadecimal (#RRGGBB)"),
-        })
-
         const { id } = paramsSchema.parse(request.params)
-        const { name, icon, color } = bodySchema.parse(request.body)
+        const { name, icon, color } = categoryBodySchema.parse(request.body)
 
         await this.categoriesService.update({ name, icon, color, id, user_id })
 

@@ -1,13 +1,13 @@
 import { Prisma } from "../../config/generated/prisma/client";
 import { prisma } from "../../config/prisma";
 import { ConflictError } from "../../errors/domain-errors";
-import { AuthRegisterInput, User } from "./auth.contracts";
+import { AuthCreateData, User } from "./auth.contracts";
 
 export class AuthRepository {
-    async create({ email, name, password }: AuthRegisterInput) {
+    async create(data: AuthCreateData) {
         try {
             return await prisma.user.create({
-                data: { email, name, password },
+                data,
                 select: { id: true },
             })
         } catch (error) {

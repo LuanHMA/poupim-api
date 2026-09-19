@@ -1,10 +1,16 @@
 import { Prisma } from "../../config/generated/prisma/client";
 import { prisma } from "../../config/prisma";
 import { ConflictError } from "../../errors/domain-errors";
-import { Category, CategoriesCreateInput, CategoriesDeleteInput, CategoriesUpdateInput } from "./categories.contracts";
+import {
+    Category,
+    CategoriesCreateData,
+    CategoriesDeleteInput,
+    CategoriesGetAllInput,
+    CategoriesUpdateData,
+} from "./categories.contracts";
 
 export class CategoriesRepository {
-    async findAllByUserId({ user_id }: Pick<Category, "user_id">) {
+    async findAllByUserId({ user_id }: CategoriesGetAllInput) {
         return prisma.category.findMany({
             where: { user_id },
         })
@@ -16,16 +22,14 @@ export class CategoriesRepository {
         })
     }
 
-    async create({ name, user_id, icon, color }: CategoriesCreateInput) {
-        await prisma.category.create({
-            data: { name, user_id, icon, color },
-        })
+    async create(data: CategoriesCreateData) {
+        await prisma.category.create({ data })
     }
 
-    async update({ id, name, icon, color }: Pick<CategoriesUpdateInput, "id" | "name" | "icon" | "color">) {
+    async update({ id, data }: { id: Category["id"], data: CategoriesUpdateData }) {
         await prisma.category.update({
             where: { id },
-            data: { name, icon, color },
+            data,
         })
     }
 

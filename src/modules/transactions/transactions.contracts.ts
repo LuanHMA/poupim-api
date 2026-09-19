@@ -4,7 +4,7 @@ export type { Transaction }
 
 export type TransactionsGetAllInput = {
     user_id: Transaction["user_id"]
-    date: Transaction["created_at"]
+    date?: Date
 }
 
 export type TransactionsGetAllOutput = {
@@ -16,24 +16,29 @@ export type TransactionsGetAllOutput = {
     created_at: Transaction["created_at"]
 }[]
 
-export type TransactionsCreateInput = Pick<
-    Prisma.TransactionUncheckedCreateInput,
-    "amount" | "category_id" | "description" | "type" | "user_id"
->
+export type TransactionsCreateInput = {
+    user_id: Transaction["user_id"]
+    description: Transaction["description"]
+    observation?: Transaction["observation"]
+    category_id: Transaction["category_id"]
+    amount: number
+    type: Transaction["type"]
+    status: Transaction["status"]
+    ignore: Transaction["ignore"]
+    fixed: Transaction["fixed"]
+    date: Date
+}
 
 export type TransactionsCreateOutput = void
 
-export type TransactionsUpdateInput = {
-    user_id: Transaction["user_id"]
-    id: Transaction["id"]
-    transaction: Pick<
-        Prisma.TransactionUncheckedCreateInput,
-        "amount" | "category_id" | "description" | "type"
-    >
-}
+export type TransactionsUpdateInput = TransactionsCreateInput & Pick<Transaction, "id">
 
 export type TransactionsUpdateOutput = void
 
 export type TransactionsDeleteInput = Pick<Transaction, "id" | "user_id">
 
 export type TransactionsDeleteOutput = void
+
+export type TransactionsCreateData = Omit<Prisma.TransactionUncheckedCreateInput, "id" | "created_at">
+
+export type TransactionsUpdateData = Prisma.TransactionUncheckedUpdateInput
