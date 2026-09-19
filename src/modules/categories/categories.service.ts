@@ -1,19 +1,28 @@
 import { NotFoundError } from "../../errors/domain-errors";
-import { Category, CategoryCreate, CategoryDelete, CategoryUpdate } from "./categories.contracts";
+import {
+    CategoriesCreateInput,
+    CategoriesCreateOutput,
+    CategoriesDeleteInput,
+    CategoriesDeleteOutput,
+    CategoriesGetAllInput,
+    CategoriesGetAllOutput,
+    CategoriesUpdateInput,
+    CategoriesUpdateOutput,
+} from "./categories.contracts";
 import { CategoriesRepository } from "./categories.repository";
 
 export class CategoriesService {
     constructor(private categoriesRepository: CategoriesRepository) {}
 
-    async getAll({ user_id }: Pick<Category, "user_id">) {
+    async getAll({ user_id }: CategoriesGetAllInput): Promise<CategoriesGetAllOutput> {
         return this.categoriesRepository.findAllByUserId({ user_id })
     }
 
-    async create({ name, user_id, type }: CategoryCreate) {
+    async create({ name, user_id, type }: CategoriesCreateInput): Promise<CategoriesCreateOutput> {
         await this.categoriesRepository.create({ name, user_id, type })
     }
 
-    async update({ name, id, user_id, type }: CategoryUpdate) {
+    async update({ name, id, user_id, type }: CategoriesUpdateInput): Promise<CategoriesUpdateOutput> {
         const category = await this.categoriesRepository.findByIdAndUserId({ id, user_id })
 
         if (!category) {
@@ -23,7 +32,7 @@ export class CategoriesService {
         await this.categoriesRepository.update({ id, name, type })
     }
 
-    async delete({ id, user_id }: CategoryDelete) {
+    async delete({ id, user_id }: CategoriesDeleteInput): Promise<CategoriesDeleteOutput> {
         const category = await this.categoriesRepository.findByIdAndUserId({ id, user_id })
 
         if (!category) {

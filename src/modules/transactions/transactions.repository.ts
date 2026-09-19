@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma";
 import { toAmount } from "../../utils/to-amount";
-import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "./transactions.contracts";
+import { Transaction, TransactionsCreateInput, TransactionsDeleteInput, TransactionsUpdateInput } from "./transactions.contracts";
 
 export class TransactionsRepository {
     async findAllByUserId({ user_id }: Pick<Transaction, "user_id">) {
@@ -28,13 +28,13 @@ export class TransactionsRepository {
         }))
     }
 
-    async findByIdAndUserId({ id, user_id }: TransactionDelete) {
+    async findByIdAndUserId({ id, user_id }: TransactionsDeleteInput) {
         return prisma.transaction.findFirst({
             where: { id, user_id },
         })
     }
 
-    async create({ amount, category_id, description, type, user_id }: TransactionCreate) {
+    async create({ amount, category_id, description, type, user_id }: TransactionsCreateInput) {
         await prisma.transaction.create({
             data: {
                 amount,
@@ -46,7 +46,7 @@ export class TransactionsRepository {
         })
     }
 
-    async update({ id, data }: { id: Transaction["id"], data: TransactionUpdate }) {
+    async update({ id, data }: { id: Transaction["id"], data: TransactionsUpdateInput["transaction"] }) {
         await prisma.transaction.update({
             where: { id },
             data,

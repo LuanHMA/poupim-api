@@ -1,10 +1,10 @@
 import { prisma } from "../../config/prisma"
 import { monthRange } from "../../utils/month-range"
 import { toAmount } from "../../utils/to-amount"
-import { CreateStats } from "./stats.contracts"
+import { StatsGetTransactionsSummaryInput } from "./stats.contracts"
 
 export class StatsRepository {
-    async findAmountsByPeriod({ month, year, user_id }: CreateStats) {
+    async findAmountsByPeriod({ month, year, user_id }: StatsGetTransactionsSummaryInput) {
         const transactions = await prisma.transaction.findMany({
             where: {
                 user_id,
@@ -22,7 +22,7 @@ export class StatsRepository {
         }))
     }
 
-    async findAmountsByCategoryAndPeriod({ month, year, user_id }: CreateStats) {
+    async findAmountsByCategoryAndPeriod({ month, year, user_id }: StatsGetTransactionsSummaryInput) {
         const transactions = await prisma.transaction.findMany({
             where: {
                 user_id,

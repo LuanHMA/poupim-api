@@ -1,10 +1,21 @@
-import { BasesStats, CategoryStats, CreateStats, TransactionSummary } from "./stats.contracts"
+import {
+    StatsGenerateInsightsInput,
+    StatsGenerateInsightsOutput,
+    StatsGetBasesStatsInput,
+    StatsGetBasesStatsOutput,
+    StatsGetCategoryStatsInput,
+    StatsGetCategoryStatsOutput,
+    StatsGetOverviewInput,
+    StatsGetOverviewOutput,
+    StatsGetTransactionsSummaryInput,
+    StatsGetTransactionsSummaryOutput,
+} from "./stats.contracts"
 import { StatsRepository } from "./stats.repository"
 
 export class StatsService {
     constructor(private statsRepository: StatsRepository) {}
 
-    async getTransactionsSummary({ month, year, user_id }: CreateStats): Promise<TransactionSummary> {
+    async getTransactionsSummary({ month, year, user_id }: StatsGetTransactionsSummaryInput): Promise<StatsGetTransactionsSummaryOutput> {
         const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
 
         const total_income = transactions.reduce((acc, item) => {
@@ -22,18 +33,18 @@ export class StatsService {
         }
     }
 
-    async getOverview({ month, year, user_id }: CreateStats) {
+    async getOverview({ month, year, user_id }: StatsGetOverviewInput): Promise<StatsGetOverviewOutput> {
         const [basesStats, categoryStats] = await Promise.all([
             this.getBasesStats({ month, year, user_id }),
             this.getCategoryStats({ month, year, user_id }),
         ])
 
-        const month_insights = this.generateInsights(
+        const month_insights = this.generateInsights({
             basesStats,
             categoryStats,
             year,
-            month
-        )
+            month,
+        })
 
         return {
             basesStats,
@@ -42,7 +53,7 @@ export class StatsService {
         }
     }
 
-    private async getBasesStats({ month, year, user_id }: CreateStats): Promise<BasesStats> {
+    private async getBasesStats({ month, year, user_id }: StatsGetBasesStatsInput): Promise<StatsGetBasesStatsOutput> {
         const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
 
         const total_income = transactions.reduce((acc, item) => {
@@ -67,7 +78,7 @@ export class StatsService {
         }
     }
 
-    private async getCategoryStats({ month, year, user_id }: CreateStats): Promise<CategoryStats[]> {
+    private async getCategoryStats({ month, year, user_id }: StatsGetCategoryStatsInput): Promise<StatsGetCategoryStatsOutput> {
         const transactions = await this.statsRepository.findAmountsByCategoryAndPeriod({ month, year, user_id })
 
         const totalsByCategory = new Map<string, number>()
@@ -88,12 +99,12 @@ export class StatsService {
         }))
     }
 
-    private generateInsights(
-        basesStats: BasesStats,
-        categoryStats: CategoryStats[],
-        year: number,
-        month: number,
-    ) {
+    private generateInsights({
+        basesStats,
+        categoryStats,
+        year,
+        month,
+    }: StatsGenerateInsightsInput): StatsGenerateInsightsOutput {
         const { average_daily_expense, transactions_total, balance, total_expense, total_income } = basesStats
 
         const daysInMonth = new Date(year, month, 0).getDate()

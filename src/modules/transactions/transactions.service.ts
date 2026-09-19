@@ -1,6 +1,15 @@
 import { NotFoundError } from "../../errors/domain-errors";
 import { CategoriesRepository } from "../categories/categories.repository";
-import { Transaction, TransactionCreate, TransactionDelete, TransactionUpdate } from "./transactions.contracts";
+import {
+    TransactionsCreateInput,
+    TransactionsCreateOutput,
+    TransactionsDeleteInput,
+    TransactionsDeleteOutput,
+    TransactionsGetAllInput,
+    TransactionsGetAllOutput,
+    TransactionsUpdateInput,
+    TransactionsUpdateOutput,
+} from "./transactions.contracts";
 import { TransactionsRepository } from "./transactions.repository";
 
 export class TransactionsService {
@@ -9,11 +18,11 @@ export class TransactionsService {
         private categoriesRepository: CategoriesRepository,
     ) {}
 
-    async getAll({ user_id }: Pick<Transaction, "user_id">) {
+    async getAll({ user_id }: TransactionsGetAllInput): Promise<TransactionsGetAllOutput> {
         return this.transactionsRepository.findAllByUserId({ user_id })
     }
 
-    async create({ amount, category_id, description, type, user_id }: TransactionCreate) {
+    async create({ amount, category_id, description, type, user_id }: TransactionsCreateInput): Promise<TransactionsCreateOutput> {
         const category = await this.categoriesRepository.findByIdAndUserId({ id: category_id, user_id })
 
         if (!category) {
@@ -29,7 +38,7 @@ export class TransactionsService {
         })
     }
 
-    async update({ user_id, id, transaction }: { user_id: Transaction["user_id"], id: Transaction["id"], transaction: TransactionUpdate }) {
+    async update({ user_id, id, transaction }: TransactionsUpdateInput): Promise<TransactionsUpdateOutput> {
         const existing = await this.transactionsRepository.findByIdAndUserId({ id, user_id })
 
         if (!existing) {
@@ -50,7 +59,7 @@ export class TransactionsService {
         await this.transactionsRepository.update({ id, data: transaction })
     }
 
-    async delete({ id, user_id }: TransactionDelete) {
+    async delete({ id, user_id }: TransactionsDeleteInput): Promise<TransactionsDeleteOutput> {
         const transaction = await this.transactionsRepository.findByIdAndUserId({ id, user_id })
 
         if (!transaction) {

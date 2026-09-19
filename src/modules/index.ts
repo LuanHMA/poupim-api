@@ -14,5 +14,4 @@ export function routes(app: FastifyInstance) {
     app.register(transactionsRoutes, { prefix: "/transactions" })
     app.register(authRoutes, { prefix: "/auth" })
     app.register(statsRoutes, { prefix: "/stats" })
-
 }
