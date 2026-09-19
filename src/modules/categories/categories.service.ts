@@ -12,24 +12,24 @@ import {
 import { CategoriesRepository } from "./categories.repository";
 
 export class CategoriesService {
-    constructor(private categoriesRepository: CategoriesRepository) {}
+    constructor(private categoriesRepository: CategoriesRepository) { }
 
     async getAll({ user_id }: CategoriesGetAllInput): Promise<CategoriesGetAllOutput> {
         return this.categoriesRepository.findAllByUserId({ user_id })
     }
 
-    async create({ name, user_id, type }: CategoriesCreateInput): Promise<CategoriesCreateOutput> {
-        await this.categoriesRepository.create({ name, user_id, type })
+    async create({ name, icon, color, user_id }: CategoriesCreateInput): Promise<CategoriesCreateOutput> {
+        await this.categoriesRepository.create({ name, icon, color, user_id })
     }
 
-    async update({ name, id, user_id, type }: CategoriesUpdateInput): Promise<CategoriesUpdateOutput> {
+    async update({ name, icon, color, id, user_id }: CategoriesUpdateInput): Promise<CategoriesUpdateOutput> {
         const category = await this.categoriesRepository.findByIdAndUserId({ id, user_id })
 
         if (!category) {
             throw new NotFoundError("Não existe nenhuma categoria com esse ID")
         }
 
-        await this.categoriesRepository.update({ id, name, type })
+        await this.categoriesRepository.update({ id, name, icon, color })
     }
 
     async delete({ id, user_id }: CategoriesDeleteInput): Promise<CategoriesDeleteOutput> {

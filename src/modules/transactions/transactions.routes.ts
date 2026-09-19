@@ -17,6 +17,6 @@ export async function transactionsRoutes(app: FastifyInstance) {
     app.addHook("preHandler", AuthMiddleware)
     app.get("/", { schema: listTransactionsSchema }, transactionController.getAll.bind(transactionController))
     app.post("/", { schema: createTransactionSchema }, transactionController.create.bind(transactionController))
-    app.put("/", { schema: updateTransactionSchema }, transactionController.update.bind(transactionController))
-    app.delete("/", { schema: deleteTransactionSchema }, transactionController.delete.bind(transactionController))
+    app.put("/:id", { schema: updateTransactionSchema }, transactionController.update.bind(transactionController))
+    app.delete("/:id", { schema: deleteTransactionSchema }, transactionController.delete.bind(transactionController))
 }

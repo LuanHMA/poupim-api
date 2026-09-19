@@ -2,7 +2,10 @@ import { Prisma, Transaction } from "../../config/generated/prisma/client"
 
 export type { Transaction }
 
-export type TransactionsGetAllInput = Pick<Transaction, "user_id">
+export type TransactionsGetAllInput = {
+    user_id: Transaction["user_id"]
+    date: Transaction["created_at"]
+}
 
 export type TransactionsGetAllOutput = {
     id: Transaction["id"]

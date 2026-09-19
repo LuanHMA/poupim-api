@@ -13,6 +13,6 @@ export async function categoriesRoutes(app: FastifyInstance) {
     app.addHook(`preHandler`, AuthMiddleware)
     app.post("/", { schema: createCategorySchema }, categoriesController.create.bind(categoriesController))
     app.get("/", { schema: listCategoriesSchema }, categoriesController.getAll.bind(categoriesController))
-    app.delete("/", { schema: deleteCategorySchema }, categoriesController.delete.bind(categoriesController))
-    app.put("/", { schema: updateCategorySchema }, categoriesController.update.bind(categoriesController))
+    app.delete("/:id", { schema: deleteCategorySchema }, categoriesController.delete.bind(categoriesController))
+    app.put("/:id", { schema: updateCategorySchema }, categoriesController.update.bind(categoriesController))
 }

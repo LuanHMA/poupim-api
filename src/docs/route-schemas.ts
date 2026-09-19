@@ -192,11 +192,23 @@ export const createCategorySchema: FastifySchema = {
 export const updateCategorySchema: FastifySchema = {
     tags: ["Categories"],
     summary: "Atualizar categoria",
-    description: "Atualiza o nome e o tipo de uma categoria existente.",
+    description: "Atualiza o nome, ícone e cor de uma categoria existente.",
     security: bearerSecurity,
+    params: {
+        type: "object",
+        required: ["id"],
+        properties: {
+            id: {
+                type: "integer",
+                minimum: 1,
+                description: "ID da categoria",
+                example: 1,
+            },
+        },
+    },
     body: {
         type: "object",
-        required: ["name", "category_id", "type"],
+        required: ["name", "icon", "color"],
         properties: {
             name: {
                 type: "string",
@@ -205,13 +217,20 @@ export const updateCategorySchema: FastifySchema = {
                 description: "Novo nome da categoria",
                 example: "Moradia",
             },
-            category_id: {
-                type: "integer",
-                minimum: 1,
-                description: "ID da categoria",
-                example: 1,
+            icon: {
+                type: "string",
+                minLength: 1,
+                maxLength: 64,
+                description: "Ícone da categoria",
+                example: "tag",
             },
-            type: transactionTypeSchema,
+            color: {
+                type: "string",
+                minLength: 7,
+                maxLength: 7,
+                description: "Cor hexadecimal da categoria",
+                example: "#6366F1",
+            },
         },
     },
     response: {
@@ -234,11 +253,11 @@ export const deleteCategorySchema: FastifySchema = {
     summary: "Deletar categoria",
     description: "Remove uma categoria do usuário autenticado.",
     security: bearerSecurity,
-    body: {
+    params: {
         type: "object",
-        required: ["category_id"],
+        required: ["id"],
         properties: {
-            category_id: {
+            id: {
                 type: "integer",
                 minimum: 1,
                 description: "ID da categoria",
@@ -337,9 +356,21 @@ export const updateTransactionSchema: FastifySchema = {
     summary: "Atualizar transação",
     description: "Atualiza os dados de uma transação existente.",
     security: bearerSecurity,
+    params: {
+        type: "object",
+        required: ["id"],
+        properties: {
+            id: {
+                type: "integer",
+                minimum: 1,
+                description: "ID da transação",
+                example: 10,
+            },
+        },
+    },
     body: {
         type: "object",
-        required: ["description", "category_id", "amount", "type", "transactionId"],
+        required: ["description", "category_id", "amount", "type"],
         properties: {
             description: {
                 type: "string",
@@ -361,12 +392,6 @@ export const updateTransactionSchema: FastifySchema = {
                 example: 89.9,
             },
             type: transactionTypeSchema,
-            transactionId: {
-                type: "integer",
-                minimum: 1,
-                description: "ID da transação",
-                example: 10,
-            },
         },
     },
     response: {
@@ -390,11 +415,11 @@ export const deleteTransactionSchema: FastifySchema = {
     summary: "Deletar transação",
     description: "Remove uma transação do usuário autenticado.",
     security: bearerSecurity,
-    body: {
+    params: {
         type: "object",
-        required: ["transactionId"],
+        required: ["id"],
         properties: {
-            transactionId: {
+            id: {
                 type: "integer",
                 minimum: 1,
                 description: "ID da transação",

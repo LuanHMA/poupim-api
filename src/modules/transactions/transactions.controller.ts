@@ -8,7 +8,13 @@ export class TransactionsController {
     async getAll(request: FastifyRequest, reply: FastifyReply) {
         const { id } = request.user
 
-        const transactions = await this.transactionService.getAll({ user_id: id })
+        const querySchema = z.object({
+            date: z.date("Insira uma data válida")
+        })
+
+        const { date } = querySchema.parse(request.query)
+
+        const transactions = await this.transactionService.getAll({ user_id: id, date })
 
         return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions })
     }
@@ -44,7 +50,11 @@ export class TransactionsController {
     }
 
     async update(request: FastifyRequest, reply: FastifyReply) {
-        const { id } = request.user
+        const { id: user_id } = request.user
+
+        const paramsSchema = z.object({
+            id: z.coerce.number("Insira um ID válido").min(1, "O ID é obrigatório"),
+        })
 
         const bodySchema = z.object({
             description: z
@@ -58,16 +68,14 @@ export class TransactionsController {
                 .refine((value) => value > 0, "O amount deve ser maior que zero"),
             type: z
                 .enum(["INCOME", "EXPENSE"], "Insira um type válido"),
-            transactionId: z
-                .number("Insira um id válido")
-                .min(1, "O id é obrigatório")
         })
 
-        const { description, category_id, amount, type, transactionId } = bodySchema.parse(request.body)
+        const { id } = paramsSchema.parse(request.params)
+        const { description, category_id, amount, type } = bodySchema.parse(request.body)
 
         await this.transactionService.update({
-            id: transactionId,
-            user_id: id,
+            id,
+            user_id,
             transaction: {
                 amount,
                 category_id,
@@ -80,17 +88,15 @@ export class TransactionsController {
     }
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
-        const { id } = request.user
+        const { id: user_id } = request.user
 
-        const bodySchema = z.object({
-            transactionId: z
-                .number("Insira um ID válido")
-                .min(1, "O ID é obrigátorio"),
+        const paramsSchema = z.object({
+            id: z.coerce.number("Insira um ID válido").min(1, "O ID é obrigatório"),
         })
 
-        const { transactionId } = bodySchema.parse(request.body)
+        const { id } = paramsSchema.parse(request.params)
 
-        await this.transactionService.delete({ id: transactionId, user_id: id })
+        await this.transactionService.delete({ id, user_id })
 
         return reply.status(200).send({ message: "Transação deletada com sucesso!" })
     }

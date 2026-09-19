@@ -10,7 +10,7 @@ export type CategoriesCreateInput = Omit<Category, "id" | "created_at">
 
 export type CategoriesCreateOutput = void
 
-export type CategoriesUpdateInput = Pick<Category, "id" | "name" | "user_id" | "type">
+export type CategoriesUpdateInput = Pick<Category, "id" | "name" | "user_id" | "icon" | "color">
 
 export type CategoriesUpdateOutput = void
 

@@ -3,7 +3,7 @@ import z from "zod";
 import { CategoriesService } from "./categories.service";
 
 export class CategoriesController {
-    constructor(private categoriesService: CategoriesService) {}
+    constructor(private categoriesService: CategoriesService) { }
 
     async getAll(request: FastifyRequest, reply: FastifyReply) {
         const { id } = request.user
@@ -21,51 +21,61 @@ export class CategoriesController {
                 .string("Insira um nome válido")
                 .max(100, "Máximo de caracteres excedido")
                 .min(1, "O nome da categoria é obrigatório"),
-            type: z
-                .enum(["INCOME", "EXPENSE"], "Insira um type válido")
+            icon: z
+                .string("Insira um ícone válido")
+                .max(64, "Máximo de caracteres excedido")
+                .min(1, "O ícone da categoria é obrigatório"),
+            color: z
+                .string("Insira uma cor válida")
+                .regex(/^#[0-9A-Fa-f]{6}$/, "A cor deve estar no formato hexadecimal (#RRGGBB)"),
         })
 
-        const { name, type } = bodySchema.parse(request.body)
+        const { name, icon, color } = bodySchema.parse(request.body)
 
-        await this.categoriesService.create({ name, user_id: id, type })
+        await this.categoriesService.create({ name, icon, color, user_id: id })
 
         return reply.status(201).send({ message: "Categoria criada com sucesso!" })
     }
 
     async update(request: FastifyRequest, reply: FastifyReply) {
-        const { id } = request.user
+        const { id: user_id } = request.user
+
+        const paramsSchema = z.object({
+            id: z.coerce.number("Insira um ID válido").min(1, "O ID é obrigatório"),
+        })
 
         const bodySchema = z.object({
             name: z
                 .string("Insira um nome válido")
                 .max(100, "Máximo de caracteres excedido")
                 .min(1, "O nome da categoria é obrigatório"),
-            category_id: z
-                .number("Insira um ID válido")
-                .min(1, "O ID é obrigátorio"),
-            type: z
-                .enum(["INCOME", "EXPENSE"], "Insira um type válido")
+            icon: z
+                .string("Insira um ícone válido")
+                .max(64, "Máximo de caracteres excedido")
+                .min(1, "O ícone da categoria é obrigatório"),
+            color: z
+                .string("Insira uma cor válida")
+                .regex(/^#[0-9A-Fa-f]{6}$/, "A cor deve estar no formato hexadecimal (#RRGGBB)"),
         })
 
-        const { name, category_id, type } = bodySchema.parse(request.body)
+        const { id } = paramsSchema.parse(request.params)
+        const { name, icon, color } = bodySchema.parse(request.body)
 
-        await this.categoriesService.update({ name, id: category_id, user_id: id, type })
+        await this.categoriesService.update({ name, icon, color, id, user_id })
 
         return reply.status(200).send({ message: "Categoria atualizada com sucesso!" })
     }
 
     async delete(request: FastifyRequest, reply: FastifyReply) {
-        const { id } = request.user
+        const { id: user_id } = request.user
 
-        const bodySchema = z.object({
-            category_id: z
-                .number("Insira um ID válido")
-                .min(1, "O ID é obrigátorio"),
+        const paramsSchema = z.object({
+            id: z.coerce.number("Insira um ID válido").min(1, "O ID é obrigatório"),
         })
 
-        const { category_id } = bodySchema.parse(request.body)
+        const { id } = paramsSchema.parse(request.params)
 
-        await this.categoriesService.delete({ id: category_id, user_id: id })
+        await this.categoriesService.delete({ id, user_id })
 
         return reply.status(200).send({ message: "Categoria deletada com sucesso!" })
     }

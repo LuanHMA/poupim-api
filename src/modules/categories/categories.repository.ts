@@ -16,16 +16,16 @@ export class CategoriesRepository {
         })
     }
 
-    async create({ name, user_id, type }: CategoriesCreateInput) {
+    async create({ name, user_id, icon, color }: CategoriesCreateInput) {
         await prisma.category.create({
-            data: { name, user_id, type },
+            data: { name, user_id, icon, color },
         })
     }
 
-    async update({ id, name, type }: Pick<CategoriesUpdateInput, "id" | "name" | "type">) {
+    async update({ id, name, icon, color }: Pick<CategoriesUpdateInput, "id" | "name" | "icon" | "color">) {
         await prisma.category.update({
             where: { id },
-            data: { name, type },
+            data: { name, icon, color },
         })
     }
 
