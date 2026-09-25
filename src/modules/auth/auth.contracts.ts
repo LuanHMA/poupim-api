@@ -15,7 +15,7 @@ export type AuthLoginInput = {
     password: string
 }
 
-export type AuthLoginOutput = Pick<User, "id">
+export type AuthLoginOutput = Omit<User, "password">
 
 export type AuthGetUserInput = Pick<User, "id">
 

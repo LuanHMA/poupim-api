@@ -34,12 +34,14 @@ export class TransactionsController {
         const { id } = request.user
 
         const querySchema = z.object({
-            date: z.coerce.date("Insira uma data válida").optional()
+            month: z.coerce.number("Insira um month válido").min(1, "O month é obrigatório"),
+            year: z.coerce.number("Insira um year válido").min(1, "O year é obrigatório"),
+            limit: z.coerce.number("Insira um limite válido").min(1, "O limite é obrigatório").optional(),
         })
 
-        const { date } = querySchema.parse(request.query)
+        const { month, year, limit } = querySchema.parse(request.query)
 
-        const transactions = await this.transactionService.getAll({ user_id: id, date })
+        const transactions = await this.transactionService.getAll({ user_id: id, month, year, limit })
 
         return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions })
     }

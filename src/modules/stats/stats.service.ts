@@ -1,4 +1,6 @@
 import {
+    GetCashFlowInput,
+    GetCashFlowOutput,
     StatsGenerateInsightsInput,
     StatsGenerateInsightsOutput,
     StatsGetBasesStatsInput,
@@ -7,15 +9,15 @@ import {
     StatsGetCategoryStatsOutput,
     StatsGetOverviewInput,
     StatsGetOverviewOutput,
-    StatsGetTransactionsSummaryInput,
-    StatsGetTransactionsSummaryOutput,
+    StatsGetPeriodsInput,
+    StatsGetPeriodsOutput,
 } from "./stats.contracts"
 import { StatsRepository } from "./stats.repository"
 
 export class StatsService {
     constructor(private statsRepository: StatsRepository) {}
 
-    async getTransactionsSummary({ month, year, user_id }: StatsGetTransactionsSummaryInput): Promise<StatsGetTransactionsSummaryOutput> {
+    async getCashFlow({ month, year, user_id }: GetCashFlowInput): Promise<GetCashFlowOutput> {
         const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
 
         const total_income = transactions.reduce((acc, item) => {
@@ -30,7 +32,13 @@ export class StatsService {
             total_income,
             total_expense,
             balance: total_income - total_expense,
+            month,
+            year
         }
+    }
+
+    async getPeriods({ user_id }: StatsGetPeriodsInput): Promise<StatsGetPeriodsOutput> {
+        return this.statsRepository.findPeriodsByUser({ user_id })
     }
 
     async getOverview({ month, year, user_id }: StatsGetOverviewInput): Promise<StatsGetOverviewOutput> {
@@ -52,6 +60,13 @@ export class StatsService {
             month_insights
         }
     }
+
+    async getTopCategories({ month, year, user_id }: StatsGetCategoryStatsInput): Promise<StatsGetCategoryStatsOutput> {
+        const categoryStats = await this.getCategoryStats({ month, year, user_id })
+
+        return categoryStats.sort((a, b) => b.total_amount - a.total_amount)
+    }
+
 
     private async getBasesStats({ month, year, user_id }: StatsGetBasesStatsInput): Promise<StatsGetBasesStatsOutput> {
         const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })

@@ -8,7 +8,7 @@ import {
     TransactionsGetAllInput,
     TransactionsGetAllOutput,
     TransactionsUpdateInput,
-    TransactionsUpdateOutput,
+    TransactionsUpdateOutput
 } from "./transactions.contracts";
 import { TransactionsRepository } from "./transactions.repository";
 
@@ -18,9 +18,10 @@ export class TransactionsService {
         private categoriesRepository: CategoriesRepository,
     ) { }
 
-    async getAll({ user_id, date }: TransactionsGetAllInput): Promise<TransactionsGetAllOutput> {
-        return this.transactionsRepository.findAllByUserId({ user_id, date })
+    async getAll({ user_id, month, year, limit }: TransactionsGetAllInput): Promise<TransactionsGetAllOutput> {
+        return this.transactionsRepository.findManyByMonthAndYear({ user_id, month, year, limit })
     }
+
 
     async create({ user_id, date, observation, ...transaction }: TransactionsCreateInput): Promise<TransactionsCreateOutput> {
         const category = await this.categoriesRepository.findByIdAndUserId({

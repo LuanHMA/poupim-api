@@ -33,9 +33,9 @@ export class AuthService {
             throw new BadRequestError("Credenciais Inválidas")
         }
 
-        return {
-            id: user.id
-        }
+        const { password: _, ...userWithoutPassword } = user
+
+        return userWithoutPassword
     }
 
     async getUser({ id }: AuthGetUserInput): Promise<AuthGetUserOutput> {

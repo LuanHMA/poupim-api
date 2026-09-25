@@ -9,14 +9,17 @@ import {
 } from "./transactions.contracts";
 
 export class TransactionsRepository {
-    async findAllByUserId({ user_id, date }: TransactionsGetAllInput) {
-        const where = {
-            ...(date ? { created_at: { gte: date, lte: new Date(date.getTime() + 24 * 60 * 60 * 1000 - 1) } } : {}),
-            user_id,
-        }
-
+    async findManyByMonthAndYear({ user_id, month, year, limit }: TransactionsGetAllInput) {
         const transactions = await prisma.transaction.findMany({
-            where,
+            where: {
+                month,
+                year,
+                user_id,
+            },
+            take: limit,
+            orderBy: {
+                created_at: "desc",
+            },
             select: {
                 id: true,
                 description: true,
@@ -50,6 +53,7 @@ export class TransactionsRepository {
             observation: transaction.observation,
         }))
     }
+
 
     async findByIdAndUserId({ id, user_id }: TransactionsDeleteInput) {
         return prisma.transaction.findFirst({

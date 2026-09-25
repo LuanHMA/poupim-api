@@ -7,8 +7,9 @@ import {
     errorResponseSchema,
     monthInsightsSchema,
     overviewSchema,
+    periodSchema,
     transactionSchema,
-    transactionSummarySchema,
+    cashFlowSchema,
     userSchema,
 } from "./common-schemas"
 
@@ -24,7 +25,7 @@ export const swaggerOptions = {
             { name: "Auth", description: "Cadastro, login e dados do usuário autenticado" },
             { name: "Categories", description: "Categorias de receitas e despesas" },
             { name: "Transactions", description: "Lançamentos financeiros" },
-            { name: "Stats", description: "Resumos, overview e insights do período" },
+            { name: "Stats", description: "Cash flow, overview, períodos, top categorias e insights" },
         ],
         components: {
             securitySchemes: {
@@ -40,11 +41,12 @@ export const swaggerOptions = {
                 User: userSchema,
                 Category: categorySchema,
                 Transaction: transactionSchema,
-                TransactionSummary: transactionSummarySchema,
+                CashFlow: cashFlowSchema,
                 BasesStats: basesStatsSchema,
                 CategoryStats: categoryStatsSchema,
                 MonthInsights: monthInsightsSchema,
                 Overview: overviewSchema,
+                Period: periodSchema,
             },
         },
     },

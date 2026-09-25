@@ -77,7 +77,7 @@ export const transactionSchema = {
     },
 }
 
-export const transactionSummarySchema = {
+export const cashFlowSchema = {
     type: "object",
     properties: {
         total_income: { type: "number", example: 5000 },
@@ -175,6 +175,14 @@ export const overviewSchema = {
             items: categoryStatsSchema,
         },
         month_insights: monthInsightsSchema,
+    },
+}
+
+export const periodSchema = {
+    type: "object",
+    properties: {
+        month: { type: "integer", minimum: 1, maximum: 12, example: 3 },
+        year: { type: "integer", example: 2026 },
     },
 }
 

@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma"
 import { toAmount } from "../../utils/to-amount"
-import { StatsFindByPeriodData } from "./stats.contracts"
+import { StatsFindByPeriodData, StatsGetPeriodsInput } from "./stats.contracts"
 
 export class StatsRepository {
     async findAmountsByPeriod({ month, year, user_id }: StatsFindByPeriodData) {
@@ -41,5 +41,18 @@ export class StatsRepository {
             amount: toAmount(transaction.amount),
             category: transaction.category.name,
         }))
+    }
+
+    async findPeriodsByUser({ user_id }: StatsGetPeriodsInput) {
+        const periods = await prisma.transaction.groupBy({
+            by: ["year", "month"],
+            where: { user_id },
+            orderBy: [
+                { year: "desc" },
+                { month: "desc" },
+            ],
+        })
+
+        return periods.map(({ month, year }) => ({ month, year }))
     }
 }

@@ -6,9 +6,11 @@ import {
     internalErrorResponse,
     notFoundErrorResponse,
     overviewSchema,
+    periodSchema,
     statsQuerySchema,
+    categoryStatsSchema,
     transactionSchema,
-    transactionSummarySchema,
+    cashFlowSchema,
     transactionTypeSchema,
     unauthorizedErrorResponse,
     userSchema,
@@ -442,23 +444,46 @@ export const deleteTransactionSchema: FastifySchema = {
     },
 }
 
-export const transactionsSummarySchema: FastifySchema = {
+export const cashFlowSchemaDoc: FastifySchema = {
     tags: ["Stats"],
-    summary: "Resumo das transações",
+    summary: "Fluxo de caixa",
     description: "Retorna totais de receita, despesa e saldo do mês/ano informados. Sem query params, usa o mês e o ano atuais.",
     security: bearerSecurity,
     querystring: statsQuerySchema,
     response: {
         200: {
-            description: "Resumo encontrado",
+            description: "Fluxo de caixa encontrado",
             type: "object",
             properties: {
-                message: { type: "string", example: "Resumo das transações buscadas com sucesso" },
+                message: { type: "string", example: "Fluxo de caixa buscado com sucesso" },
                 success: { type: "boolean", example: true },
-                summary: transactionSummarySchema,
+                cashFlow: cashFlowSchema,
             },
         },
         400: validationErrorResponse,
+        401: unauthorizedErrorResponse,
+        500: internalErrorResponse,
+    },
+}
+
+export const periodsSchemaDoc: FastifySchema = {
+    tags: ["Stats"],
+    summary: "Períodos com registros",
+    description: "Retorna os meses e anos em que o usuário autenticado possui transações, do mais recente para o mais antigo.",
+    security: bearerSecurity,
+    response: {
+        200: {
+            description: "Períodos encontrados",
+            type: "object",
+            properties: {
+                message: { type: "string", example: "Períodos buscados com sucesso" },
+                success: { type: "boolean", example: true },
+                periods: {
+                    type: "array",
+                    items: periodSchema,
+                },
+            },
+        },
         401: unauthorizedErrorResponse,
         500: internalErrorResponse,
     },
@@ -478,6 +503,31 @@ export const overviewSchemaDoc: FastifySchema = {
                 message: { type: "string", example: "Overview das transações buscadas com sucesso" },
                 success: { type: "boolean", example: true },
                 overview: overviewSchema,
+            },
+        },
+        400: validationErrorResponse,
+        401: unauthorizedErrorResponse,
+        500: internalErrorResponse,
+    },
+}
+
+export const topCategoriesSchemaDoc: FastifySchema = {
+    tags: ["Stats"],
+    summary: "Top categorias",
+    description: "Retorna as categorias ordenadas pelo maior gasto do mês/ano informados. Sem query params, usa o mês e o ano atuais.",
+    security: bearerSecurity,
+    querystring: statsQuerySchema,
+    response: {
+        200: {
+            description: "Top categorias encontradas",
+            type: "object",
+            properties: {
+                message: { type: "string", example: "Top categorias buscadas com sucesso" },
+                success: { type: "boolean", example: true },
+                topCategories: {
+                    type: "array",
+                    items: categoryStatsSchema,
+                },
             },
         },
         400: validationErrorResponse,

@@ -1,3 +1,4 @@
+import fastifyCors from "@fastify/cors"
 import fastifyJwt from "@fastify/jwt"
 import fastifySwagger from "@fastify/swagger"
 import fastifySwaggerUi from "@fastify/swagger-ui"
@@ -11,11 +12,17 @@ import { globalErrorHandler } from "./errors/global-error"
 import { routes } from "./modules"
 
 const app = fastify()
+const port = 3001
 
 app.setErrorHandler(globalErrorHandler)
 
 app.setValidatorCompiler(() => (data) => ({ value: data }))
 app.setSerializerCompiler(() => (data) => JSON.stringify(data))
+
+app.register(fastifyCors, {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+})
 
 app.register(fastifyJwt, {
     secret: env.JWT_SECRET,
@@ -39,5 +46,5 @@ app.addHook("onClose", async () => {
 })
 
 app.listen({
-    port: 3000,
-}).then(() => console.log("Server is running on port 3000"))
+    port,
+}).then(() => console.log("Server is running on port "+port))

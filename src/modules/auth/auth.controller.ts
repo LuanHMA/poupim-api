@@ -22,9 +22,9 @@ export class AuthController {
         const body = bodySchema.parse(request.body)
 
         const { id } = await this.authService.register(body)
-        const token = await reply.jwtSign({ id })
+        const accessToken = await reply.jwtSign({ id })
 
-        return reply.status(201).send({ message: "Usuário criado com sucesso!", success: true, token })
+        return reply.status(201).send({ message: "Usuário criado com sucesso!", success: true, accessToken })
     }
 
     async login(request: FastifyRequest, reply: FastifyReply) {
@@ -40,10 +40,10 @@ export class AuthController {
 
         const body = bodySchema.parse(request.body)
 
-        const { id } = await this.authService.login(body)
-        const token = await reply.jwtSign({ id })
+        const user = await this.authService.login(body)
+        const accessToken = await reply.jwtSign({ id: user.id })
 
-        return reply.status(200).send({ message: "Usuário logado com sucesso", success: true, token })
+        return reply.status(200).send({ message: "Usuário logado com sucesso", success: true, accessToken, user })
     }
 
     async me(request: FastifyRequest, reply: FastifyReply) {

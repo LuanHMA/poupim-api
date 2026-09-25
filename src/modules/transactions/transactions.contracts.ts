@@ -4,7 +4,9 @@ export type { Transaction }
 
 export type TransactionsGetAllInput = {
     user_id: Transaction["user_id"]
-    date?: Date
+    month: Transaction["month"]
+    year: Transaction["year"]
+    limit?: number
 }
 
 export type TransactionsGetAllOutput = {
