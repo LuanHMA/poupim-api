@@ -12,7 +12,7 @@ import { globalErrorHandler } from "./errors/global-error"
 import { routes } from "./modules"
 
 const app = fastify()
-const port = 3001
+const port = env.PORT ?? 3333
 
 app.setErrorHandler(globalErrorHandler)
 
