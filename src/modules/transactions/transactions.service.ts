@@ -36,6 +36,7 @@ export class TransactionsService {
             month: date.getMonth() + 1,
             year: date.getFullYear(),
             observation: observation ?? "",
+            category_id: category.id
         })
     }
 

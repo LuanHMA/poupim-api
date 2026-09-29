@@ -14,7 +14,11 @@ export type TransactionsGetAllOutput = {
     description: Transaction["description"]
     amount: number
     type: Transaction["type"]
-    category_name: string | null
+    category: {
+        name: string | null
+        color: string | null
+        icon: string | null
+    }
     created_at: Transaction["created_at"]
 }[]
 
