@@ -25,7 +25,6 @@ model User {
   email        String        @unique @db.VarChar(191)
   password     String        @db.VarChar(191)
   created_at   DateTime      @default(now())
-  categories   Category[]
   transactions Transaction[]
 
   @@map("users")
@@ -34,14 +33,11 @@ model User {
 model Category {
   id           Int           @id @default(autoincrement())
   name         String        @db.VarChar(100)
-  user_id      Int
   icon         String        @default("tag") @db.VarChar(64)
   color        String        @default("#6366F1") @db.VarChar(7)
   created_at   DateTime      @default(now())
-  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
-  @@index([user_id])
   @@map("categories")
 }
 

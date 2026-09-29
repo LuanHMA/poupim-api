@@ -28,6 +28,7 @@ export class StatsRepository {
                 user_id,
                 month,
                 year,
+                type: "EXPENSE",
             },
             select: {
                 amount: true,

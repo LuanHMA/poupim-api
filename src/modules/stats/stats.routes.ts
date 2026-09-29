@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { cashFlowSchemaDoc, overviewSchemaDoc, periodsSchemaDoc, topCategoriesSchemaDoc } from "../../docs/route-schemas";
+import { cashFlowSchemaDoc, overviewSchemaDoc, periodsSchemaDoc, topExpenseCategoriesSchemaDoc } from "../../docs/route-schemas";
 import { AuthMiddleware } from "../../middleware/auth-middleware";
 import { StatsController } from "./stats.controller";
 import { StatsRepository } from "./stats.repository";
@@ -15,5 +15,5 @@ export async function statsRoutes(app: FastifyInstance) {
     app.get("/cash-flow", { schema: cashFlowSchemaDoc }, statsController.getCashFlow.bind(statsController))
     app.get("/overview", { schema: overviewSchemaDoc }, statsController.getOverview.bind(statsController))
     app.get("/periods", { schema: periodsSchemaDoc }, statsController.getPeriods.bind(statsController))
-    app.get("/top-categories", { schema: topCategoriesSchemaDoc }, statsController.getTopCategories.bind(statsController))
+    app.get("/top-expense-categories", { schema: topExpenseCategoriesSchemaDoc }, statsController.getTopExpenseCategories.bind(statsController))
 }

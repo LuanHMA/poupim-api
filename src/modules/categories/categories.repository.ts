@@ -1,49 +1,16 @@
-import { Prisma } from "../../config/generated/prisma/client";
 import { prisma } from "../../config/prisma";
-import { ConflictError } from "../../errors/domain-errors";
-import {
-    Category,
-    CategoriesCreateData,
-    CategoriesDeleteInput,
-    CategoriesGetAllInput,
-    CategoriesUpdateData,
-} from "./categories.contracts";
+import { CategoriesGetAllOutput } from "./categories.contracts";
 
 export class CategoriesRepository {
-    async findAllByUserId({ user_id }: CategoriesGetAllInput) {
+    async findAll(): Promise<CategoriesGetAllOutput> {
         return prisma.category.findMany({
-            where: { user_id },
+            orderBy: { name: "asc" },
         })
     }
 
-    async findByIdAndUserId({ id, user_id }: CategoriesDeleteInput) {
-        return prisma.category.findFirst({
-            where: { id, user_id },
-        })
-    }
-
-    async create(data: CategoriesCreateData) {
-        await prisma.category.create({ data })
-    }
-
-    async update({ id, data }: { id: Category["id"], data: CategoriesUpdateData }) {
-        await prisma.category.update({
+    async findById(id: number) {
+        return prisma.category.findUnique({
             where: { id },
-            data,
         })
-    }
-
-    async delete({ id }: Pick<Category, "id">) {
-        try {
-            await prisma.category.delete({
-                where: { id },
-            })
-        } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code === "P2003" || error.code === "P2014")) {
-                throw new ConflictError("Não é possível excluir uma categoria que possui transações")
-            }
-
-            throw error
-        }
     }
 }

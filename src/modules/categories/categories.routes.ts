@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createCategorySchema, deleteCategorySchema, listCategoriesSchema, updateCategorySchema } from "../../docs/route-schemas";
+import { listCategoriesSchema } from "../../docs/route-schemas";
 import { AuthMiddleware } from "../../middleware/auth-middleware";
 import { CategoriesController } from "./categories.controller";
 import { CategoriesRepository } from "./categories.repository";
@@ -11,8 +11,5 @@ export async function categoriesRoutes(app: FastifyInstance) {
     )
 
     app.addHook(`preHandler`, AuthMiddleware)
-    app.post("/", { schema: createCategorySchema }, categoriesController.create.bind(categoriesController))
     app.get("/", { schema: listCategoriesSchema }, categoriesController.getAll.bind(categoriesController))
-    app.delete("/:id", { schema: deleteCategorySchema }, categoriesController.delete.bind(categoriesController))
-    app.put("/:id", { schema: updateCategorySchema }, categoriesController.update.bind(categoriesController))
 }

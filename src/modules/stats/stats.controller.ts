@@ -62,7 +62,7 @@ export class StatsController {
         return reply.status(200).send({ message: "Overview das transações buscadas com sucesso", success: true, overview })
     }
 
-    async getTopCategories(request: FastifyRequest, reply: FastifyReply) {
+    async getTopExpenseCategories(request: FastifyRequest, reply: FastifyReply) {
         const { id } = request.user
 
         const querySchema = z.object({
@@ -77,12 +77,12 @@ export class StatsController {
 
         const { month, year } = querySchema.parse(request.query)
 
-        const topCategories = await this.statsService.getTopCategories({
+        const topExpenseCategories = await this.statsService.getTopExpenseCategories({
             month: month ?? new Date().getMonth() + 1,
             year: year ?? new Date().getFullYear(),
             user_id: id
         })
 
-        return reply.status(200).send({ message: "Top categorias buscadas com sucesso", success: true, topCategories })
+        return reply.status(200).send({ message: "Top categorias de despesa buscadas com sucesso", success: true, topExpenseCategories })
     }
 }

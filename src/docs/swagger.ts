@@ -23,8 +23,8 @@ export const swaggerOptions = {
         tags: [
             { name: "Health", description: "Status da API" },
             { name: "Auth", description: "Cadastro, login e dados do usuário autenticado" },
-            { name: "Categories", description: "Categorias de receitas e despesas" },
-            { name: "Transactions", description: "Lançamentos financeiros" },
+            { name: "Categories", description: "Categorias pré-definidas do sistema, com ícone e cor" },
+            { name: "Transactions", description: "Lançamentos financeiros de um mês" },
             { name: "Stats", description: "Cash flow, overview, períodos, top categorias e insights" },
         ],
         components: {

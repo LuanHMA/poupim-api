@@ -4,6 +4,12 @@ export const transactionTypeSchema = {
     description: "Tipo da movimentação: receita (INCOME) ou despesa (EXPENSE)",
 }
 
+export const transactionStatusSchema = {
+    type: "string",
+    enum: ["PAID", "PENDING", "RECEIVED"] as string[],
+    description: "Status da transação: pago (PAID), pendente (PENDING) ou recebido (RECEIVED)",
+}
+
 export const errorResponseSchema = {
     type: "object",
     properties: {
@@ -59,8 +65,16 @@ export const categorySchema = {
     properties: {
         id: { type: "integer", example: 1 },
         name: { type: "string", example: "Alimentação" },
-        type: transactionTypeSchema,
-        user_id: { type: "integer", example: 1 },
+        icon: {
+            type: "string",
+            description: "Nome do ícone no Lucide",
+            example: "utensils",
+        },
+        color: {
+            type: "string",
+            description: "Cor hexadecimal da categoria",
+            example: "#F59E0B",
+        },
         created_at: { type: "string", format: "date-time", example: "2026-03-18T12:00:00.000Z" },
     },
 }
@@ -70,9 +84,23 @@ export const transactionSchema = {
     properties: {
         id: { type: "integer", example: 10 },
         description: { type: "string", example: "Supermercado" },
+        observation: { type: "string", example: "Compra da semana" },
         amount: { type: "number", example: 150.9 },
         type: transactionTypeSchema,
-        category_name: { type: "string", example: "Alimentação" },
+        status: transactionStatusSchema,
+        ignore: {
+            type: "boolean",
+            description: "Marca a transação como ignorada. Os totais de estatísticas continuam incluindo essas transações.",
+            example: false,
+        },
+        fixed: {
+            type: "boolean",
+            description: "Indica se a transação é fixa.",
+            example: false,
+        },
+        month: { type: "integer", minimum: 1, maximum: 12, example: 3 },
+        year: { type: "integer", example: 2026 },
+        category_name: { type: "string", nullable: true, example: "Alimentação" },
         created_at: { type: "string", format: "date-time", example: "2026-03-18T12:00:00.000Z" },
     },
 }
@@ -80,6 +108,8 @@ export const transactionSchema = {
 export const cashFlowSchema = {
     type: "object",
     properties: {
+        month: { type: "integer", minimum: 1, maximum: 12, example: 3 },
+        year: { type: "integer", example: 2026 },
         total_income: { type: "number", example: 5000 },
         total_expense: { type: "number", example: 2300.5 },
         balance: { type: "number", example: 2699.5 },
@@ -100,6 +130,7 @@ export const basesStatsSchema = {
 
 export const categoryStatsSchema = {
     type: "object",
+    description: "Gasto de uma categoria de despesa no período. O percentual é a fatia sobre o total de despesas.",
     properties: {
         category: { type: "string", example: "Alimentação" },
         total_amount: { type: "number", example: 890.5 },

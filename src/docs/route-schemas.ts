@@ -11,6 +11,7 @@ import {
     categoryStatsSchema,
     transactionSchema,
     cashFlowSchema,
+    transactionStatusSchema,
     transactionTypeSchema,
     unauthorizedErrorResponse,
     userSchema,
@@ -67,7 +68,7 @@ export const registerSchema: FastifySchema = {
             properties: {
                 message: { type: "string", example: "Usuário criado com sucesso!" },
                 success: { type: "boolean", example: true },
-                token: { type: "string", example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
+                accessToken: { type: "string", example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
             },
         },
         400: validationErrorResponse,
@@ -79,7 +80,7 @@ export const registerSchema: FastifySchema = {
 export const loginSchema: FastifySchema = {
     tags: ["Auth"],
     summary: "Login",
-    description: "Autentica o usuário e retorna um token JWT.",
+    description: "Autentica o usuário e retorna o token JWT junto com os dados da conta. E-mail inexistente responde 404; senha incorreta responde 400.",
     security: [],
     body: {
         type: "object",
@@ -106,7 +107,8 @@ export const loginSchema: FastifySchema = {
             properties: {
                 message: { type: "string", example: "Usuário logado com sucesso" },
                 success: { type: "boolean", example: true },
-                token: { type: "string", example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
+                accessToken: { type: "string", example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
+                user: userSchema,
             },
         },
         400: validationErrorResponse,
@@ -139,7 +141,7 @@ export const meSchema: FastifySchema = {
 export const listCategoriesSchema: FastifySchema = {
     tags: ["Categories"],
     summary: "Listar categorias",
-    description: "Retorna todas as categorias do usuário autenticado.",
+    description: "Retorna as categorias pré-definidas do sistema para o usuário escolher na transação.",
     security: bearerSecurity,
     response: {
         200: {
@@ -158,136 +160,85 @@ export const listCategoriesSchema: FastifySchema = {
     },
 }
 
-export const createCategorySchema: FastifySchema = {
-    tags: ["Categories"],
-    summary: "Criar categoria",
-    description: "Cria uma nova categoria de receita ou despesa.",
-    security: bearerSecurity,
-    body: {
-        type: "object",
-        required: ["name", "type"],
-        properties: {
-            name: {
-                type: "string",
-                minLength: 1,
-                maxLength: 100,
-                description: "Nome da categoria",
-                example: "Alimentação",
-            },
-            type: transactionTypeSchema,
+const transactionWriteBody = {
+    type: "object",
+    required: ["description", "category_id", "amount", "type", "status", "ignore", "fixed", "date"],
+    properties: {
+        description: {
+            type: "string",
+            minLength: 1,
+            description: "Descrição da transação",
+            example: "Supermercado",
         },
-    },
-    response: {
-        201: {
-            description: "Categoria criada",
-            type: "object",
-            properties: {
-                message: { type: "string", example: "Categoria criada com sucesso!" },
-            },
+        observation: {
+            type: "string",
+            description: "Observação opcional. Quando omitida, é gravada como texto vazio.",
+            example: "Compra da semana",
         },
-        400: validationErrorResponse,
-        401: unauthorizedErrorResponse,
-        500: internalErrorResponse,
-    },
-}
-
-export const updateCategorySchema: FastifySchema = {
-    tags: ["Categories"],
-    summary: "Atualizar categoria",
-    description: "Atualiza o nome, ícone e cor de uma categoria existente.",
-    security: bearerSecurity,
-    params: {
-        type: "object",
-        required: ["id"],
-        properties: {
-            id: {
-                type: "integer",
-                minimum: 1,
-                description: "ID da categoria",
-                example: 1,
-            },
+        category_id: {
+            type: "integer",
+            minimum: 1,
+            description: "ID de uma categoria pré-definida do sistema",
+            example: 1,
         },
-    },
-    body: {
-        type: "object",
-        required: ["name", "icon", "color"],
-        properties: {
-            name: {
-                type: "string",
-                minLength: 1,
-                maxLength: 100,
-                description: "Novo nome da categoria",
-                example: "Moradia",
-            },
-            icon: {
-                type: "string",
-                minLength: 1,
-                maxLength: 64,
-                description: "Ícone da categoria",
-                example: "tag",
-            },
-            color: {
-                type: "string",
-                minLength: 7,
-                maxLength: 7,
-                description: "Cor hexadecimal da categoria",
-                example: "#6366F1",
-            },
+        amount: {
+            type: "number",
+            minimum: 0,
+            exclusiveMinimum: true,
+            description: "Valor da transação. Deve ser maior que zero.",
+            example: 150.9,
         },
-    },
-    response: {
-        200: {
-            description: "Categoria atualizada",
-            type: "object",
-            properties: {
-                message: { type: "string", example: "Categoria atualizada com sucesso!" },
-            },
+        type: transactionTypeSchema,
+        status: transactionStatusSchema,
+        ignore: {
+            type: "boolean",
+            description: "Marca a transação como ignorada",
+            example: false,
         },
-        400: validationErrorResponse,
-        401: unauthorizedErrorResponse,
-        404: notFoundErrorResponse,
-        500: internalErrorResponse,
-    },
-}
-
-export const deleteCategorySchema: FastifySchema = {
-    tags: ["Categories"],
-    summary: "Deletar categoria",
-    description: "Remove uma categoria do usuário autenticado.",
-    security: bearerSecurity,
-    params: {
-        type: "object",
-        required: ["id"],
-        properties: {
-            id: {
-                type: "integer",
-                minimum: 1,
-                description: "ID da categoria",
-                example: 1,
-            },
+        fixed: {
+            type: "boolean",
+            description: "Marca a transação como fixa",
+            example: false,
         },
-    },
-    response: {
-        200: {
-            description: "Categoria deletada",
-            type: "object",
-            properties: {
-                message: { type: "string", example: "Categoria deletada com sucesso!" },
-            },
+        date: {
+            type: "string",
+            format: "date-time",
+            description: "Data da transação. O mês e o ano persistidos vêm deste valor.",
+            example: "2026-03-18T12:00:00.000Z",
         },
-        400: validationErrorResponse,
-        401: unauthorizedErrorResponse,
-        404: notFoundErrorResponse,
-        409: conflictErrorResponse,
-        500: internalErrorResponse,
     },
 }
 
 export const listTransactionsSchema: FastifySchema = {
     tags: ["Transactions"],
     summary: "Listar transações",
-    description: "Retorna todas as transações do usuário autenticado, incluindo o nome da categoria.",
+    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga. Cada item inclui o nome da categoria.",
     security: bearerSecurity,
+    querystring: {
+        type: "object",
+        required: ["month", "year"],
+        properties: {
+            month: {
+                type: "integer",
+                minimum: 1,
+                maximum: 12,
+                description: "Mês de referência (1-12)",
+                example: 3,
+            },
+            year: {
+                type: "integer",
+                minimum: 1,
+                description: "Ano de referência",
+                example: 2026,
+            },
+            limit: {
+                type: "integer",
+                minimum: 1,
+                description: "Quantidade máxima de transações. Sem este parâmetro, retorna todas do período.",
+                example: 20,
+            },
+        },
+    },
     response: {
         200: {
             description: "Transações encontradas",
@@ -301,6 +252,7 @@ export const listTransactionsSchema: FastifySchema = {
                 },
             },
         },
+        400: validationErrorResponse,
         401: unauthorizedErrorResponse,
         500: internalErrorResponse,
     },
@@ -309,34 +261,9 @@ export const listTransactionsSchema: FastifySchema = {
 export const createTransactionSchema: FastifySchema = {
     tags: ["Transactions"],
     summary: "Criar transação",
-    description: "Registra uma nova receita ou despesa.",
+    description: "Registra uma nova receita ou despesa. O mês e o ano são derivados do campo date. A categoria precisa existir no catálogo do sistema.",
     security: bearerSecurity,
-    body: {
-        type: "object",
-        required: ["description", "category_id", "amount", "type"],
-        properties: {
-            description: {
-                type: "string",
-                minLength: 1,
-                description: "Descrição da transação",
-                example: "Supermercado",
-            },
-            category_id: {
-                type: "integer",
-                minimum: 1,
-                description: "ID da categoria vinculada",
-                example: 1,
-            },
-            amount: {
-                type: "number",
-                minimum: 0,
-                exclusiveMinimum: true,
-                description: "Valor da transação. Deve ser maior que zero.",
-                example: 150.9,
-            },
-            type: transactionTypeSchema,
-        },
-    },
+    body: transactionWriteBody,
     response: {
         201: {
             description: "Transação criada",
@@ -348,7 +275,7 @@ export const createTransactionSchema: FastifySchema = {
         },
         400: validationErrorResponse,
         401: unauthorizedErrorResponse,
-        409: conflictErrorResponse,
+        404: notFoundErrorResponse,
         500: internalErrorResponse,
     },
 }
@@ -356,7 +283,7 @@ export const createTransactionSchema: FastifySchema = {
 export const updateTransactionSchema: FastifySchema = {
     tags: ["Transactions"],
     summary: "Atualizar transação",
-    description: "Atualiza os dados de uma transação existente.",
+    description: "Atualiza os dados de uma transação existente. O mês e o ano são derivados do campo date. A categoria precisa existir no catálogo do sistema.",
     security: bearerSecurity,
     params: {
         type: "object",
@@ -370,32 +297,7 @@ export const updateTransactionSchema: FastifySchema = {
             },
         },
     },
-    body: {
-        type: "object",
-        required: ["description", "category_id", "amount", "type"],
-        properties: {
-            description: {
-                type: "string",
-                minLength: 1,
-                description: "Nova descrição da transação",
-                example: "Farmácia",
-            },
-            category_id: {
-                type: "integer",
-                minimum: 1,
-                description: "ID da categoria vinculada",
-                example: 2,
-            },
-            amount: {
-                type: "number",
-                minimum: 0,
-                exclusiveMinimum: true,
-                description: "Novo valor da transação. Deve ser maior que zero.",
-                example: 89.9,
-            },
-            type: transactionTypeSchema,
-        },
-    },
+    body: transactionWriteBody,
     response: {
         200: {
             description: "Transação atualizada",
@@ -447,7 +349,7 @@ export const deleteTransactionSchema: FastifySchema = {
 export const cashFlowSchemaDoc: FastifySchema = {
     tags: ["Stats"],
     summary: "Fluxo de caixa",
-    description: "Retorna totais de receita, despesa e saldo do mês/ano informados. Sem query params, usa o mês e o ano atuais.",
+    description: "Retorna o mês, o ano e os totais de receita, despesa e saldo. Sem query params, usa o mês e o ano atuais. Transações marcadas como ignoradas entram nos totais.",
     security: bearerSecurity,
     querystring: statsQuerySchema,
     response: {
@@ -455,7 +357,7 @@ export const cashFlowSchemaDoc: FastifySchema = {
             description: "Fluxo de caixa encontrado",
             type: "object",
             properties: {
-                message: { type: "string", example: "Fluxo de caixa buscado com sucesso" },
+                message: { type: "string", example: "Fluxo de saldo buscado com sucesso" },
                 success: { type: "boolean", example: true },
                 cashFlow: cashFlowSchema,
             },
@@ -492,7 +394,7 @@ export const periodsSchemaDoc: FastifySchema = {
 export const overviewSchemaDoc: FastifySchema = {
     tags: ["Stats"],
     summary: "Overview financeiro",
-    description: "Retorna estatísticas base, gastos por categoria e insights do mês/ano informados. Sem query params, usa o mês e o ano atuais.",
+    description: "Retorna estatísticas base, gastos por categoria de despesa e insights do mês/ano informados. Sem query params, usa o mês e o ano atuais. Transações marcadas como ignoradas entram nos totais.",
     security: bearerSecurity,
     querystring: statsQuerySchema,
     response: {
@@ -511,20 +413,20 @@ export const overviewSchemaDoc: FastifySchema = {
     },
 }
 
-export const topCategoriesSchemaDoc: FastifySchema = {
+export const topExpenseCategoriesSchemaDoc: FastifySchema = {
     tags: ["Stats"],
-    summary: "Top categorias",
-    description: "Retorna as categorias ordenadas pelo maior gasto do mês/ano informados. Sem query params, usa o mês e o ano atuais.",
+    summary: "Top categorias de despesa",
+    description: "Retorna até 5 categorias de despesa com maior gasto do mês/ano informados, já com o percentual sobre o total de despesas. Sem query params, usa o mês e o ano atuais.",
     security: bearerSecurity,
     querystring: statsQuerySchema,
     response: {
         200: {
-            description: "Top categorias encontradas",
+            description: "Top categorias de despesa encontradas",
             type: "object",
             properties: {
-                message: { type: "string", example: "Top categorias buscadas com sucesso" },
+                message: { type: "string", example: "Top categorias de despesa buscadas com sucesso" },
                 success: { type: "boolean", example: true },
-                topCategories: {
+                topExpenseCategories: {
                     type: "array",
                     items: categoryStatsSchema,
                 },

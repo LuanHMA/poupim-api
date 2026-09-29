@@ -61,10 +61,12 @@ export class StatsService {
         }
     }
 
-    async getTopCategories({ month, year, user_id }: StatsGetCategoryStatsInput): Promise<StatsGetCategoryStatsOutput> {
+    async getTopExpenseCategories({ month, year, user_id }: StatsGetCategoryStatsInput): Promise<StatsGetCategoryStatsOutput> {
         const categoryStats = await this.getCategoryStats({ month, year, user_id })
 
-        return categoryStats.sort((a, b) => b.total_amount - a.total_amount)
+        return categoryStats
+            .sort((a, b) => b.total_amount - a.total_amount)
+            .slice(0, 5)
     }
 
 
