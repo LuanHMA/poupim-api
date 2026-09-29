@@ -9,12 +9,23 @@ import {
 } from "./transactions.contracts";
 
 export class TransactionsRepository {
-    async findManyByMonthAndYear({ user_id, month, year, limit }: TransactionsGetAllInput) {
+    async findManyByMonthAndYear({ user_id, month, year, limit, type, category_id, status, search }: TransactionsGetAllInput) {
         const transactions = await prisma.transaction.findMany({
             where: {
                 month,
                 year,
                 user_id,
+                type,
+                category_id,
+                status,
+                ...(search
+                    ? {
+                        OR: [
+                            { description: { contains: search, mode: "insensitive" } },
+                            { observation: { contains: search, mode: "insensitive" } },
+                        ],
+                    }
+                    : {}),
             },
             take: limit,
             orderBy: {

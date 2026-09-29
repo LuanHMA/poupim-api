@@ -7,6 +7,10 @@ export type TransactionsGetAllInput = {
     month: Transaction["month"]
     year: Transaction["year"]
     limit?: number
+    type?: Transaction["type"]
+    category_id?: Transaction["category_id"]
+    status?: Transaction["status"]
+    search?: string
 }
 
 export type TransactionsGetAllOutput = {

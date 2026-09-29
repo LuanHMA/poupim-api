@@ -18,10 +18,9 @@ export class TransactionsService {
         private categoriesRepository: CategoriesRepository,
     ) { }
 
-    async getAll({ user_id, month, year, limit }: TransactionsGetAllInput): Promise<TransactionsGetAllOutput> {
-        return this.transactionsRepository.findManyByMonthAndYear({ user_id, month, year, limit })
+    async getAll(filters: TransactionsGetAllInput): Promise<TransactionsGetAllOutput> {
+        return this.transactionsRepository.findManyByMonthAndYear(filters)
     }
-
 
     async create({ user_id, date, observation, ...transaction }: TransactionsCreateInput): Promise<TransactionsCreateOutput> {
         const category = await this.categoriesRepository.findById(transaction.category_id)

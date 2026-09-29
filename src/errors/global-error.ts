@@ -93,39 +93,35 @@ export function globalErrorHandler(error: Error, request: FastifyRequest, reply:
         request.log.error(`[PRISMA ERROR] ${error.code}: ${error.message}`);
     }
 
-    // Validação de erros SQL do mysql2
-    else if (typeof (error as any).code === 'string' && typeof (error as any).errno === 'number') {
-        const sqlCode = (error as any).code;
-        let sqlMessage = 'Erro de banco de dados.';
+    else if (typeof (error as unknown as { code?: string }).code === "string" && /^[0-9A-Z]{5}$/.test((error as unknown as { code: string }).code)) {
+        const sqlCode = (error as unknown as { code: string }).code;
+        let sqlMessage = "Erro de banco de dados.";
         let sqlStatus = 400;
 
         switch (sqlCode) {
-            case 'ER_DUP_ENTRY':
-                sqlMessage = 'Já existe um registro com esse valor';
-                break;
-            case 'ER_BAD_FIELD_ERROR':
-                sqlMessage = 'Campo inválido na consulta.';
-                break;
-            case 'ER_NO_REFERENCED_ROW_2':
-                sqlMessage = 'Chave estrangeira não encontrada.';
+            case "23505":
+                sqlMessage = "Já existe um registro com esse valor";
                 sqlStatus = 409;
                 break;
-            case 'ER_ROW_IS_REFERENCED_2':
-                sqlMessage = 'Violação de chave estrangeira: registro referenciado.';
+            case "23503":
+                sqlMessage = "Violação de chave estrangeira.";
                 sqlStatus = 409;
                 break;
-            case 'ER_PARSE_ERROR':
-                sqlMessage = 'Erro de sintaxe SQL.';
+            case "42703":
+                sqlMessage = "Campo inválido na consulta.";
+                break;
+            case "42601":
+                sqlMessage = "Erro de sintaxe SQL.";
                 break;
             default:
-                sqlMessage = error.message || 'Erro de banco de dados.';
+                sqlMessage = error.message || "Erro de banco de dados.";
         }
 
         statusCode = sqlStatus;
         responseBody = {
             message: sqlMessage,
         };
-        request.log.error(`[MYSQL ERROR] ${sqlCode}: ${error.message}`);
+        request.log.error(`[POSTGRES ERROR] ${sqlCode}: ${error.message}`);
     }
 
     else {
