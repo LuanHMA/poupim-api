@@ -47,4 +47,5 @@ app.addHook("onClose", async () => {
 
 app.listen({
     port,
+    host: "0.0.0.0",
 }).then(() => console.log("Server is running on port " + port))
