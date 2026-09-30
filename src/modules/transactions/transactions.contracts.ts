@@ -19,6 +19,7 @@ export type TransactionsGetAllOutput = {
     amount: number
     type: Transaction["type"]
     category: {
+        id: number
         name: string | null
         color: string | null
         icon: string | null

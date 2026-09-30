@@ -100,7 +100,25 @@ export const transactionSchema = {
         },
         month: { type: "integer", minimum: 1, maximum: 12, example: 3 },
         year: { type: "integer", example: 2026 },
-        category_name: { type: "string", nullable: true, example: "Alimentação" },
+        category: {
+            type: "object",
+            description: "Categoria da transação. Os campos ficam nulos quando a categoria não existe.",
+            properties: {
+                name: { type: "string", nullable: true, example: "Alimentação" },
+                color: {
+                    type: "string",
+                    nullable: true,
+                    description: "Cor hexadecimal da categoria",
+                    example: "#F59E0B",
+                },
+                icon: {
+                    type: "string",
+                    nullable: true,
+                    description: "Nome do ícone no Lucide",
+                    example: "utensils",
+                },
+            },
+        },
         created_at: { type: "string", format: "date-time", example: "2026-03-18T12:00:00.000Z" },
     },
 }

@@ -38,7 +38,7 @@ export class TransactionsRepository {
                 type: true,
                 created_at: true,
                 category: {
-                    select: { name: true, color: true, icon: true },
+                    select: { id: true, name: true, color: true, icon: true },
                 },
                 month: true,
                 year: true,
@@ -55,6 +55,7 @@ export class TransactionsRepository {
             amount: toAmount(transaction.amount),
             type: transaction.type,
             category: {
+                id: transaction.category?.id ?? null,
                 name: transaction.category?.name ?? null,
                 color: transaction.category?.color ?? null,
                 icon: transaction.category?.icon ?? null,

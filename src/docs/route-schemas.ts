@@ -212,7 +212,7 @@ const transactionWriteBody = {
 export const listTransactionsSchema: FastifySchema = {
     tags: ["Transactions"],
     summary: "Listar transações",
-    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga. Cada item inclui o nome da categoria. Os filtros type, category_id, status e search são opcionais e se combinam.",
+    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga. Cada item inclui a categoria com nome, cor e ícone. Os filtros type, category_id, status e search são opcionais e se combinam.",
     security: bearerSecurity,
     querystring: {
         type: "object",
