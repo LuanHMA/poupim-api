@@ -1,4 +1,5 @@
 import { NotFoundError } from "../../errors/domain-errors";
+import { getTransactionPeriod } from "../../utils/transaction-period";
 import { CategoriesRepository } from "../categories/categories.repository";
 import {
     TransactionsCreateInput,
@@ -29,11 +30,14 @@ export class TransactionsService {
             throw new NotFoundError("Não existe nenhuma categoria com esse ID")
         }
 
+        const { month, year } = getTransactionPeriod(date)
+
         await this.transactionsRepository.create({
             ...transaction,
             user_id,
-            month: date.getMonth() + 1,
-            year: date.getFullYear(),
+            transaction_date: date,
+            month,
+            year,
             observation: observation ?? "",
             category_id: category.id
         })
@@ -52,12 +56,15 @@ export class TransactionsService {
             throw new NotFoundError("Não existe nenhuma categoria com esse ID")
         }
 
+        const { month, year } = getTransactionPeriod(date)
+
         await this.transactionsRepository.update({
             id,
             data: {
                 ...transaction,
-                month: date.getMonth() + 1,
-                year: date.getFullYear(),
+                transaction_date: date,
+                month,
+                year,
                 observation: observation ?? "",
             },
         })

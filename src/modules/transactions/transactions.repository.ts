@@ -34,14 +34,16 @@ export class TransactionsRepository {
                 where,
                 skip: (page - 1) * limit,
                 take: limit,
-                orderBy: {
-                    created_at: "desc",
-                },
+                orderBy: [
+                    { transaction_date: "desc" },
+                    { id: "desc" },
+                ],
                 select: {
                     id: true,
                     description: true,
                     amount: true,
                     type: true,
+                    transaction_date: true,
                     created_at: true,
                     category: {
                         select: { id: true, name: true, color: true, icon: true },
@@ -67,6 +69,7 @@ export class TransactionsRepository {
                 color: transaction.category?.color ?? null,
                 icon: transaction.category?.icon ?? null,
             },
+            transaction_date: transaction.transaction_date,
             created_at: transaction.created_at,
             month: transaction.month,
             year: transaction.year,

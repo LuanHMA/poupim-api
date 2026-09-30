@@ -98,6 +98,12 @@ export const transactionSchema = {
             description: "Indica se a transação é fixa.",
             example: false,
         },
+        transaction_date: {
+            type: "string",
+            format: "date-time",
+            description: "Data e hora informadas pelo usuário para a transação. O month e o year são derivados dela no fuso da aplicação.",
+            example: "2026-03-03T14:35:00.000Z",
+        },
         month: { type: "integer", minimum: 1, maximum: 12, example: 3 },
         year: { type: "integer", example: 2026 },
         category: {

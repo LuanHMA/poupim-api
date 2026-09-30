@@ -26,6 +26,7 @@ export type TransactionsGetAllOutput = {
             color: string | null
             icon: string | null
         }
+        transaction_date: Transaction["transaction_date"]
         created_at: Transaction["created_at"]
         month: Transaction["month"]
         year: Transaction["year"]
