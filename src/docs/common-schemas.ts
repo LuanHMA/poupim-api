@@ -104,6 +104,7 @@ export const transactionSchema = {
             type: "object",
             description: "Categoria da transação. Os campos ficam nulos quando a categoria não existe.",
             properties: {
+                id: { type: "integer", nullable: true, example: 1 },
                 name: { type: "string", nullable: true, example: "Alimentação" },
                 color: {
                     type: "string",

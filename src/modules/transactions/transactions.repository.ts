@@ -5,51 +5,58 @@ import {
     TransactionsCreateData,
     TransactionsDeleteInput,
     TransactionsGetAllInput,
+    TransactionsGetAllOutput,
     TransactionsUpdateData,
 } from "./transactions.contracts";
 
 export class TransactionsRepository {
-    async findManyByMonthAndYear({ user_id, month, year, limit, type, category_id, status, search }: TransactionsGetAllInput) {
-        const transactions = await prisma.transaction.findMany({
-            where: {
-                month,
-                year,
-                user_id,
-                type,
-                category_id,
-                status,
-                ...(search
-                    ? {
-                        OR: [
-                            { description: { contains: search, mode: "insensitive" } },
-                            { observation: { contains: search, mode: "insensitive" } },
-                        ],
-                    }
-                    : {}),
-            },
-            take: limit,
-            orderBy: {
-                created_at: "desc",
-            },
-            select: {
-                id: true,
-                description: true,
-                amount: true,
-                type: true,
-                created_at: true,
-                category: {
-                    select: { id: true, name: true, color: true, icon: true },
-                },
-                month: true,
-                year: true,
-                status: true,
-                ignore: true,
-                fixed: true,
-                observation: true,
-            },
-        })
+    async findManyByMonthAndYear({ user_id, month, year, page, limit, type, category_id, status, search }: TransactionsGetAllInput): Promise<TransactionsGetAllOutput> {
+        const where = {
+            month,
+            year,
+            user_id,
+            type,
+            category_id,
+            status,
+            ...(search
+                ? {
+                    OR: [
+                        { description: { contains: search, mode: "insensitive" as const } },
+                        { observation: { contains: search, mode: "insensitive" as const } },
+                    ],
+                }
+                : {}),
+        }
 
-        return transactions.map((transaction) => ({
+        const [total, rows] = await prisma.$transaction([
+            prisma.transaction.count({ where }),
+            prisma.transaction.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: {
+                    created_at: "desc",
+                },
+                select: {
+                    id: true,
+                    description: true,
+                    amount: true,
+                    type: true,
+                    created_at: true,
+                    category: {
+                        select: { id: true, name: true, color: true, icon: true },
+                    },
+                    month: true,
+                    year: true,
+                    status: true,
+                    ignore: true,
+                    fixed: true,
+                    observation: true,
+                },
+            }),
+        ])
+
+        const transactions = rows.map((transaction) => ({
             id: transaction.id,
             description: transaction.description,
             amount: toAmount(transaction.amount),
@@ -68,6 +75,16 @@ export class TransactionsRepository {
             fixed: transaction.fixed,
             observation: transaction.observation,
         }))
+
+        return {
+            transactions,
+            pagination: {
+                page,
+                limit,
+                total,
+                total_pages: total === 0 ? 0 : Math.ceil(total / limit),
+            },
+        }
     }
 
 

@@ -6,7 +6,8 @@ export type TransactionsGetAllInput = {
     user_id: Transaction["user_id"]
     month: Transaction["month"]
     year: Transaction["year"]
-    limit?: number
+    page: number
+    limit: number
     type?: Transaction["type"]
     category_id?: Transaction["category_id"]
     status?: Transaction["status"]
@@ -14,18 +15,32 @@ export type TransactionsGetAllInput = {
 }
 
 export type TransactionsGetAllOutput = {
-    id: Transaction["id"]
-    description: Transaction["description"]
-    amount: number
-    type: Transaction["type"]
-    category: {
-        id: number
-        name: string | null
-        color: string | null
-        icon: string | null
+    transactions: {
+        id: Transaction["id"]
+        description: Transaction["description"]
+        amount: number
+        type: Transaction["type"]
+        category: {
+            id: number | null
+            name: string | null
+            color: string | null
+            icon: string | null
+        }
+        created_at: Transaction["created_at"]
+        month: Transaction["month"]
+        year: Transaction["year"]
+        status: Transaction["status"]
+        ignore: Transaction["ignore"]
+        fixed: Transaction["fixed"]
+        observation: Transaction["observation"]
+    }[]
+    pagination: {
+        page: number
+        limit: number
+        total: number
+        total_pages: number
     }
-    created_at: Transaction["created_at"]
-}[]
+}
 
 export type TransactionsCreateInput = {
     user_id: Transaction["user_id"]

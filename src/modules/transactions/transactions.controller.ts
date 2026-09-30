@@ -36,19 +36,21 @@ export class TransactionsController {
         const querySchema = z.object({
             month: z.coerce.number("Insira um month válido").min(1, "O month é obrigatório").max(12, "O month deve estar entre 1 e 12"),
             year: z.coerce.number("Insira um year válido").min(1, "O year é obrigatório"),
-            limit: z.coerce.number("Insira um limite válido").min(1, "O limite é obrigatório").optional(),
+            page: z.coerce.number("Insira um page válido").int("Insira um page válido").min(1, "O page deve ser maior que zero").default(1),
+            limit: z.coerce.number("Insira um limite válido").int("Insira um limite válido").min(1, "O limite deve ser maior que zero").max(100, "O limite deve ser no máximo 100").default(20),
             type: z.enum(["INCOME", "EXPENSE"], "Insira um type válido").optional(),
             category_id: z.coerce.number("Insira um category_id válido").min(1, "A categoria é obrigatória").optional(),
             status: z.enum(["PAID", "PENDING", "RECEIVED"], "Insira um status válido").optional(),
             search: z.string("Insira uma busca válida").trim().min(1, "A busca não pode ser vazia").optional(),
         })
 
-        const { month, year, limit, type, category_id, status, search } = querySchema.parse(request.query)
+        const { month, year, page, limit, type, category_id, status, search } = querySchema.parse(request.query)
 
-        const transactions = await this.transactionService.getAll({
+        const { transactions, pagination } = await this.transactionService.getAll({
             user_id: id,
             month,
             year,
+            page,
             limit,
             type,
             category_id,
@@ -56,7 +58,7 @@ export class TransactionsController {
             search,
         })
 
-        return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions })
+        return reply.status(200).send({ message: "Transações buscadas com sucesso", success: true, transactions, pagination })
     }
 
     async create(request: FastifyRequest, reply: FastifyReply) {

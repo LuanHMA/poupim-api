@@ -212,7 +212,7 @@ const transactionWriteBody = {
 export const listTransactionsSchema: FastifySchema = {
     tags: ["Transactions"],
     summary: "Listar transações",
-    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga. Cada item inclui a categoria com nome, cor e ícone. Os filtros type, category_id, status e search são opcionais e se combinam.",
+    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga, paginadas. Sem page e limit, usa a página 1 com 20 itens. Cada item inclui a categoria com id, nome, cor e ícone. Os filtros type, category_id, status e search são opcionais e se combinam. A resposta traz pagination com page, limit, total e total_pages.",
     security: bearerSecurity,
     querystring: {
         type: "object",
@@ -231,10 +231,19 @@ export const listTransactionsSchema: FastifySchema = {
                 description: "Ano de referência",
                 example: 2026,
             },
+            page: {
+                type: "integer",
+                minimum: 1,
+                default: 1,
+                description: "Página da listagem. Começa em 1.",
+                example: 1,
+            },
             limit: {
                 type: "integer",
                 minimum: 1,
-                description: "Quantidade máxima de transações. Sem este parâmetro, retorna todas do período.",
+                maximum: 100,
+                default: 20,
+                description: "Quantidade de transações por página.",
                 example: 20,
             },
             type: transactionTypeSchema,
@@ -263,6 +272,15 @@ export const listTransactionsSchema: FastifySchema = {
                 transactions: {
                     type: "array",
                     items: transactionSchema,
+                },
+                pagination: {
+                    type: "object",
+                    properties: {
+                        page: { type: "integer", example: 1 },
+                        limit: { type: "integer", example: 20 },
+                        total: { type: "integer", description: "Total de transações que batem com os filtros", example: 42 },
+                        total_pages: { type: "integer", example: 3 },
+                    },
                 },
             },
         },
