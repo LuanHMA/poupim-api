@@ -20,7 +20,7 @@ app.setValidatorCompiler(() => (data) => ({ value: data }))
 app.setSerializerCompiler(() => (data) => JSON.stringify(data))
 
 app.register(fastifyCors, {
-    origin: "*",
+    origin: ["https://front-controle-de-despesas.vercel.app", "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
 })
 
