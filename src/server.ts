@@ -20,11 +20,9 @@ app.setValidatorCompiler(() => (data) => ({ value: data }))
 app.setSerializerCompiler(() => (data) => JSON.stringify(data))
 
 app.register(fastifyCors, {
-    origin: ["https://front-controle-de-despesas.vercel.app", "http://localhost:5174"],
+    origin: env.NODE_ENV === "production" ? ["https://poupim.vercel.app"] : ["http://localhost:5174"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Content-Type", "Authorization"],
 })
 
 app.register(fastifyJwt, {
