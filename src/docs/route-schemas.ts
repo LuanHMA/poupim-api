@@ -80,7 +80,7 @@ export const registerSchema: FastifySchema = {
 export const loginSchema: FastifySchema = {
     tags: ["Auth"],
     summary: "Login",
-    description: "Autentica o usuário e retorna o token JWT junto com os dados da conta. E-mail inexistente responde 404; senha incorreta responde 400.",
+    description: "Autentica o usuário e retorna o token JWT junto com os dados da conta. E-mail inexistente ou senha incorreta responde 401.",
     security: [],
     body: {
         type: "object",
@@ -112,7 +112,7 @@ export const loginSchema: FastifySchema = {
             },
         },
         400: validationErrorResponse,
-        404: notFoundErrorResponse,
+        401: unauthorizedErrorResponse,
         500: internalErrorResponse,
     },
 }

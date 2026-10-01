@@ -1,5 +1,5 @@
 import { compare, hash } from "bcrypt";
-import { BadRequestError, NotFoundError } from "../../errors/domain-errors";
+import { NotFoundError, UnauthorizedError } from "../../errors/domain-errors";
 import {
     AuthGetUserInput,
     AuthGetUserOutput,
@@ -24,13 +24,13 @@ export class AuthService {
         const user = await this.authRepository.findByEmail({ email })
 
         if (!user) {
-            throw new NotFoundError("Nenhum usuário cadastrado com essas credenciais!")
+            throw new UnauthorizedError("Credenciais inválidas")
         }
 
         const passwordIsCorrect = await compare(password, user.password)
 
         if (!passwordIsCorrect) {
-            throw new BadRequestError("Credenciais Inválidas")
+            throw new UnauthorizedError("Credenciais inválidas")
         }
 
         const { password: _, ...userWithoutPassword } = user
