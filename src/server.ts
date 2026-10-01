@@ -4,7 +4,6 @@ import fastifySwagger from "@fastify/swagger"
 import fastifySwaggerUi from "@fastify/swagger-ui"
 import "dotenv/config"
 import fastify from "fastify"
-import type { IncomingMessage, ServerResponse } from "node:http"
 import { env } from "./config/env"
 import { prisma } from "./config/prisma"
 import { healthSchema } from "./docs/route-schemas"
@@ -47,14 +46,7 @@ app.addHook("onClose", async () => {
     await prisma.$disconnect()
 })
 
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
-    await app.ready()
-    app.server.emit("request", req, res)
-}
-
-if (!process.env.VERCEL) {
-    app.listen({
-        port,
-        host: "0.0.0.0",
-    }).then(() => console.log("Server is running on port " + port))
-}
+app.listen({
+    port,
+    host: "0.0.0.0",
+}).then(() => console.log("Server is running on port " + port))
