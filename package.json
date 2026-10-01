@@ -38,6 +38,7 @@
     "zod": "^4.3.6"
   },
   "overrides": {
-    "@fastify/static": "^10.1.4"
+    "@fastify/static": "^10.1.4",
+    "content-disposition": "2.0.1"
   }
 }
