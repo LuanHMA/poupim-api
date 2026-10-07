@@ -39,7 +39,19 @@ export class TransactionsController {
             page: z.coerce.number("Insira um page válido").int("Insira um page válido").min(1, "O page deve ser maior que zero").default(1),
             limit: z.coerce.number("Insira um limite válido").int("Insira um limite válido").min(1, "O limite deve ser maior que zero").max(100, "O limite deve ser no máximo 100").default(20),
             type: z.enum(["INCOME", "EXPENSE"], "Insira um type válido").optional(),
-            category_id: z.coerce.number("Insira um category_id válido").min(1, "A categoria é obrigatória").optional(),
+            category_id: z.preprocess(
+                (value) => {
+                    if (value == null || value === "") return undefined;
+
+                    const ids = (Array.isArray(value) ? value : [value])
+                        .flatMap((item) => String(item).split(","))
+                        .map((item) => item.trim())
+                        .filter(Boolean);
+
+                    return ids.length > 0 ? [...new Set(ids)] : undefined;
+                },
+                z.array(z.coerce.number("Insira um category_id válido").int().min(1, "A categoria é obrigatória")).min(1).optional(),
+            ),
             status: z.enum(["PAID", "PENDING", "RECEIVED"], "Insira um status válido").optional(),
             search: z.string("Insira uma busca válida").trim().min(1, "A busca não pode ser vazia").optional(),
         })

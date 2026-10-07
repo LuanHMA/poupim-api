@@ -16,7 +16,7 @@ export class TransactionsRepository {
             year,
             user_id,
             type,
-            category_id,
+            ...(category_id?.length ? { category_id: { in: category_id } } : {}),
             status,
             ...(search
                 ? {

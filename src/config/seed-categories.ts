@@ -2,20 +2,43 @@ import "dotenv/config"
 import { CATEGORY_ICONS } from "../modules/categories/category-icons"
 import { prisma } from "./prisma"
 
-async function main() {
-    const existing = await prisma.category.count()
+const RENAMES = [
+    { from: "Poupança", to: "Caixinha" },
+    { from: "Ônibus", to: "Transporte" },
+]
 
-    if (existing > 0) {
-        return
+async function main() {
+    for (const rename of RENAMES) {
+        await prisma.category.updateMany({
+            where: { name: rename.from },
+            data: { name: rename.to },
+        })
     }
 
-    await prisma.category.createMany({
-        data: CATEGORY_ICONS.map((category) => ({
-            name: category.label,
-            icon: category.name,
-            color: category.color,
-        })),
-    })
+    for (const category of CATEGORY_ICONS) {
+        const existing = await prisma.category.findFirst({
+            where: { name: category.label },
+        })
+
+        if (existing) {
+            await prisma.category.update({
+                where: { id: existing.id },
+                data: {
+                    icon: category.name,
+                    color: category.color,
+                },
+            })
+            continue
+        }
+
+        await prisma.category.create({
+            data: {
+                name: category.label,
+                icon: category.name,
+                color: category.color,
+            },
+        })
+    }
 }
 
 main()

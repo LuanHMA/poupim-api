@@ -9,7 +9,7 @@ export type TransactionsGetAllInput = {
     page: number
     limit: number
     type?: Transaction["type"]
-    category_id?: Transaction["category_id"]
+    category_id?: Transaction["category_id"][]
     status?: Transaction["status"]
     search?: string
 }

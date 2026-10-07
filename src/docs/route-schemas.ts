@@ -1,16 +1,16 @@
 import type { FastifySchema } from "fastify"
 import {
     bearerSecurity,
+    cashFlowSchema,
     categorySchema,
+    categoryStatsSchema,
     conflictErrorResponse,
     internalErrorResponse,
     notFoundErrorResponse,
     overviewSchema,
     periodSchema,
     statsQuerySchema,
-    categoryStatsSchema,
     transactionSchema,
-    cashFlowSchema,
     transactionStatusSchema,
     transactionTypeSchema,
     unauthorizedErrorResponse,
@@ -212,7 +212,7 @@ const transactionWriteBody = {
 export const listTransactionsSchema: FastifySchema = {
     tags: ["Transactions"],
     summary: "Listar transações",
-    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga, paginadas. Sem page e limit, usa a página 1 com 20 itens. Cada item inclui a categoria com id, nome, cor e ícone. Os filtros type, category_id, status e search são opcionais e se combinam. A resposta traz pagination com page, limit, total e total_pages.",
+    description: "Retorna as transações do usuário no mês e ano informados, da mais recente para a mais antiga, paginadas. Sem page e limit, usa a página 1 com 20 itens. Cada item inclui a categoria com id, nome, cor e ícone. Os filtros type, category_id, status e search são opcionais e se combinam. category_id aceita um ou mais IDs separados por vírgula. A resposta traz pagination com page, limit, total e total_pages.",
     security: bearerSecurity,
     querystring: {
         type: "object",
@@ -248,10 +248,9 @@ export const listTransactionsSchema: FastifySchema = {
             },
             type: transactionTypeSchema,
             category_id: {
-                type: "integer",
-                minimum: 1,
-                description: "ID de uma categoria pré-definida do sistema",
-                example: 1,
+                type: "string",
+                description: "IDs de categorias separados por vírgula. Um único ID também é aceito.",
+                example: "1,2",
             },
             status: transactionStatusSchema,
             search: {
