@@ -65,6 +65,7 @@ export class TransactionsService {
                 transaction_date: date,
                 month,
                 year,
+                ignore: transaction.status !== "PENDING" && existing.ignore ? false : transaction.ignore,
                 observation: observation ?? "",
             },
         })

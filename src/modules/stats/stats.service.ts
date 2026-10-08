@@ -62,7 +62,6 @@ export class StatsService {
             .slice(0, 5)
     }
 
-
     private async getBasesStats({ month, year, user_id }: StatsGetBasesStatsInput): Promise<StatsGetBasesStatsOutput> {
         const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
 
