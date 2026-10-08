@@ -56,4 +56,38 @@ export class StatsRepository {
 
         return periods.map(({ month, year }) => ({ month, year }))
     }
+
+    async findTotalExpensByPeriod({ month, year, user_id }: StatsFindByPeriodData) {
+        const totalExpense = await prisma.transaction.aggregate({
+            _sum: {
+                amount: true,
+            },
+            where: {
+                user_id,
+                month,
+                year,
+                ignore: false,
+                type: "EXPENSE",
+            },
+        })
+
+        return toAmount(totalExpense._sum.amount ?? 0)
+    }
+
+    async findTotalIncomeByPeriod({ month, year, user_id }: StatsFindByPeriodData) {
+        const totalIncome = await prisma.transaction.aggregate({
+            _sum: {
+                amount: true,
+            },
+            where: {
+                user_id,
+                month,
+                year,
+                ignore: false,
+                type: "INCOME",
+            },
+        })
+
+        return toAmount(totalIncome._sum.amount ?? 0)
+    }
 }

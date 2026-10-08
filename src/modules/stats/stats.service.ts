@@ -18,15 +18,8 @@ export class StatsService {
     constructor(private statsRepository: StatsRepository) {}
 
     async getCashFlow({ month, year, user_id }: GetCashFlowInput): Promise<GetCashFlowOutput> {
-        const transactions = await this.statsRepository.findAmountsByPeriod({ month, year, user_id })
-
-        const total_income = transactions.reduce((acc, item) => {
-            return item.type === "INCOME" ? acc + item.amount : acc
-        }, 0)
-
-        const total_expense = transactions.reduce((acc, item) => {
-            return item.type === "EXPENSE" ? acc + item.amount : acc
-        }, 0)
+        const total_income = await this.statsRepository.findTotalIncomeByPeriod({ month, year, user_id })
+        const total_expense = await this.statsRepository.findTotalExpensByPeriod({ month, year, user_id })
 
         return {
             total_income,
