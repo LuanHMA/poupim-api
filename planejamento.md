@@ -1,14 +1,14 @@
 ### Dashboard — "como estou agora"
 
-- [ ] Saldo (já tem)
-- [ ] Total de receitas (já tem)
-- [ ] Total de despesas (já tem)
-- [ ] Total pendente como linha dentro do card de despesas, não como card separado
+- [x] Saldo (já tem)
+- [x] Total de receitas (já tem)
+- [x] Total de despesas (já tem)
+- [x] Total pendente como linha dentro do card de despesas, não como card separado
       ("Despesas: R$ 2.400 — desse valor, R$ 340 ainda não foi pago")
-- [ ] Onde mais gastou no mês (já tem)
-- [ ] Últimas transações (já tem, já ordenado por transaction_date)
+- [x] Onde mais gastou no mês (já tem)
+- [x] Últimas transações (já tem, já ordenado por transaction_date)
 - [ ] Quanto sobra por dia até o fim do mês ("R$ 1.240 e faltam 20 dias: R$ 62 por dia")
-- [ ] DECIDIR: receita com status PENDING entra no saldo? Se entrar, o saldo mostra
+- [x] DECIDIR: receita com status PENDING entra no saldo? Se entrar, o saldo mostra
       dinheiro que o usuário ainda não tem
 
 ### Estatísticas — plano básico (grátis)
@@ -19,7 +19,7 @@ Critério: o grátis precisa responder "esse mês foi melhor ou pior que o passa
 - [ ] Comparação até o mesmo dia do mês ("até o dia 15 você gastou R$ 1.100;
       no mês passado, até o dia 15, R$ 1.380") — só é possível por causa do transaction_date
 - [ ] Top 5 categorias com a variação em relação ao mês anterior
-- [ ] "De cada R$ 100 que entraram, quanto sobrou", com o número do mês anterior ao lado
+- [ ] Percentual do dinheiro que entrou que já foi gasto, com o número do mês anterior ao lado
 - [ ] Gráfico dos últimos 3 meses (entrou, saiu, sobrou)
 - [ ] Veredito do mês em 3 estados: tranquilo / apertado / no vermelho, com uma frase explicando
 

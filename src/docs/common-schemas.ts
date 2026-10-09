@@ -222,15 +222,95 @@ export const monthInsightsSchema = {
     },
 }
 
-export const overviewSchema = {
+const monthTotalsSchema = {
     type: "object",
     properties: {
-        basesStats: basesStatsSchema,
-        categoryStats: {
-            type: "array",
-            items: categoryStatsSchema,
+        total_income: { type: "number", example: 5000 },
+        total_expense: { type: "number", example: 2300.5 },
+        balance: { type: "number", example: 2699.5 },
+    },
+}
+
+const monthSnapshotSchema = {
+    type: "object",
+    properties: {
+        month: { type: "integer", minimum: 1, maximum: 12, example: 3 },
+        year: { type: "integer", example: 2026 },
+        ...monthTotalsSchema.properties,
+    },
+}
+
+export const monthlyStatsSchema = {
+    type: "object",
+    properties: {
+        in_progress: {
+            type: "boolean",
+            description: "Verdadeiro quando o mês pedido ainda não terminou.",
+            example: true,
         },
-        month_insights: monthInsightsSchema,
+        has_transactions: {
+            type: "boolean",
+            description: "Falso quando o mês não tem lançamentos considerados. Nesse caso o veredito vem nulo.",
+            example: true,
+        },
+        versus_previous: {
+            type: "object",
+            properties: {
+                current: monthSnapshotSchema,
+                previous: monthSnapshotSchema,
+                difference: monthTotalsSchema,
+            },
+        },
+        same_day: {
+            type: "object",
+            nullable: true,
+            description: "Comparação de gastos até o dia de hoje. Só existe enquanto o mês está em andamento.",
+            properties: {
+                day: { type: "integer", example: 15 },
+                current_expense: { type: "number", example: 1100 },
+                previous_expense: { type: "number", example: 1380 },
+                difference: { type: "number", example: -280 },
+            },
+        },
+        top_categories: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    category: { type: "string", example: "Alimentação" },
+                    total_amount: { type: "number", example: 890.5 },
+                    previous_amount: { type: "number", example: 640 },
+                    difference: { type: "number", example: 250.5 },
+                },
+            },
+        },
+        income_used_percentage: {
+            type: "object",
+            description: "Percentual do dinheiro que entrou que já foi gasto. Nulo quando não entrou dinheiro.",
+            properties: {
+                current: { type: "number", nullable: true, example: 46.01 },
+                previous: { type: "number", nullable: true, example: 58.8 },
+            },
+        },
+        last_three_months: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    ...monthSnapshotSchema.properties,
+                    in_progress: { type: "boolean", example: false },
+                },
+            },
+        },
+        verdict: {
+            type: "object",
+            nullable: true,
+            properties: {
+                state: { type: "string", enum: ["tranquilo", "apertado", "no_vermelho"] as string[], example: "tranquilo" },
+                balance: { type: "number", example: 2699.5 },
+                income_used_percentage: { type: "number", nullable: true, example: 46.01 },
+            },
+        },
     },
 }
 

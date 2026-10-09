@@ -1,13 +1,15 @@
 import type { FastifySchema } from "fastify"
 import {
     bearerSecurity,
+    basesStatsSchema,
     cashFlowSchema,
+    monthlyStatsSchema,
     categorySchema,
     categoryStatsSchema,
     conflictErrorResponse,
     internalErrorResponse,
+    monthInsightsSchema,
     notFoundErrorResponse,
-    overviewSchema,
     periodSchema,
     statsQuerySchema,
     transactionSchema,
@@ -422,20 +424,64 @@ export const periodsSchemaDoc: FastifySchema = {
     },
 }
 
-export const overviewSchemaDoc: FastifySchema = {
-    tags: ["Stats"],
-    summary: "Overview financeiro",
-    description: "Retorna estatísticas base, gastos por categoria de despesa e insights do mês/ano informados. Sem query params, usa o mês e o ano atuais. Transações marcadas como ignoradas entram nos totais.",
+export const basesStatsSchemaDoc: FastifySchema = {
+    tags: ["Reports"],
+    summary: "Estatísticas base do relatório",
+    description: "Retorna totais de receita, despesa, saldo, quantidade de transações, maior despesa e média diária de gasto do mês/ano informados. Sem query params, usa o mês e o ano atuais.",
     security: bearerSecurity,
     querystring: statsQuerySchema,
     response: {
         200: {
-            description: "Overview encontrado",
+            description: "Estatísticas base encontradas",
             type: "object",
             properties: {
-                message: { type: "string", example: "Overview das transações buscadas com sucesso" },
+                message: { type: "string", example: "Estatísticas base buscadas com sucesso" },
                 success: { type: "boolean", example: true },
-                overview: overviewSchema,
+                basesStats: basesStatsSchema,
+            },
+        },
+        400: validationErrorResponse,
+        401: unauthorizedErrorResponse,
+        500: internalErrorResponse,
+    },
+}
+
+export const monthInsightsSchemaDoc: FastifySchema = {
+    tags: ["Reports"],
+    summary: "Insights do relatório mensal",
+    description: "Retorna os insights do mês/ano informados: desempenho da economia, proporção de gastos, categoria com maior despesa, frequência e média diária. Sem query params, usa o mês e o ano atuais.",
+    security: bearerSecurity,
+    querystring: statsQuerySchema,
+    response: {
+        200: {
+            description: "Insights do mês encontrados",
+            type: "object",
+            properties: {
+                message: { type: "string", example: "Insights do mês buscados com sucesso" },
+                success: { type: "boolean", example: true },
+                monthInsights: monthInsightsSchema,
+            },
+        },
+        400: validationErrorResponse,
+        401: unauthorizedErrorResponse,
+        500: internalErrorResponse,
+    },
+}
+
+export const monthlyStatsSchemaDoc: FastifySchema = {
+    tags: ["Stats"],
+    summary: "Estatísticas do mês",
+    description: "Compara o mês pedido com o anterior: entrou, saiu e o que sobrou, a diferença em reais, o gasto até o mesmo dia, as 5 categorias que mais saíram, o percentual do dinheiro recebido que foi gasto, os últimos 3 meses e o veredito. Sem query params, usa o mês e o ano atuais. Mês sem lançamentos devolve veredito nulo.",
+    security: bearerSecurity,
+    querystring: statsQuerySchema,
+    response: {
+        200: {
+            description: "Estatísticas do mês encontradas",
+            type: "object",
+            properties: {
+                message: { type: "string", example: "Estatísticas do mês buscadas com sucesso" },
+                success: { type: "boolean", example: true },
+                monthly: monthlyStatsSchema,
             },
         },
         400: validationErrorResponse,

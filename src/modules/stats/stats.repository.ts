@@ -1,24 +1,54 @@
 import { prisma } from "../../config/prisma"
 import { toAmount } from "../../utils/to-amount"
-import { StatsFindByPeriodData, StatsGetPeriodsInput } from "./stats.contracts"
+import { StatsFindByPeriodData, StatsGetPeriodsInput, StatsPeriod } from "./stats.contracts"
 
 export class StatsRepository {
-    async findAmountsByPeriod({ month, year, user_id }: StatsFindByPeriodData) {
-        const transactions = await prisma.transaction.findMany({
+    async findTotalsByPeriods({ user_id, periods }: { user_id: number, periods: StatsPeriod[] }) {
+        const rows = await prisma.transaction.groupBy({
+            by: ["month", "year", "type"],
             where: {
                 user_id,
-                month,
-                year,
+                ignore: false,
+                OR: periods.map(({ month, year }) => ({ month, year })),
             },
-            select: {
-                type: true,
+            _sum: {
                 amount: true,
             },
         })
 
+        return rows.map((row) => ({
+            month: row.month,
+            year: row.year,
+            type: row.type,
+            amount: toAmount(row._sum.amount ?? 0),
+        }))
+    }
+
+    async findExpensesByPeriods({ user_id, periods }: { user_id: number, periods: StatsPeriod[] }) {
+        const transactions = await prisma.transaction.findMany({
+            where: {
+                user_id,
+                type: "EXPENSE",
+                ignore: false,
+                OR: periods.map(({ month, year }) => ({ month, year })),
+            },
+            select: {
+                month: true,
+                year: true,
+                amount: true,
+                transaction_date: true,
+                category: {
+                    select: { name: true },
+                },
+            },
+        })
+
         return transactions.map((transaction) => ({
-            type: transaction.type,
+            month: transaction.month,
+            year: transaction.year,
             amount: toAmount(transaction.amount),
+            transaction_date: transaction.transaction_date,
+            category: transaction.category.name,
         }))
     }
 
@@ -29,6 +59,7 @@ export class StatsRepository {
                 month,
                 year,
                 type: "EXPENSE",
+                ignore: false,
             },
             select: {
                 amount: true,
@@ -89,5 +120,17 @@ export class StatsRepository {
         })
 
         return toAmount(totalIncome._sum.amount ?? 0)
+    }
+
+    async findBalanceByPeriod({ month, year, user_id }: StatsFindByPeriodData) {
+       const totalIncome = await this.findTotalIncomeByPeriod({ month, year, user_id })
+       const totalExpense = await this.findTotalExpensByPeriod({ month, year, user_id })
+
+       if(!totalIncome || !totalExpense) {
+        return 0
+       }
+
+       const balance = totalIncome - totalExpense
+       return balance
     }
 }

@@ -2,6 +2,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { FastifyInstance } from "fastify";
 import { authRoutes } from "./auth/auth.routes";
 import { categoriesRoutes } from "./categories/categories.routes";
+import { reportsRoutes } from "./reports/reports.routes";
 import { statsRoutes } from "./stats/stats.routes";
 import { transactionsRoutes } from "./transactions/transactions.routes";
 
@@ -14,4 +15,5 @@ export function routes(app: FastifyInstance) {
     app.register(transactionsRoutes, { prefix: "/transactions" })
     app.register(authRoutes, { prefix: "/auth" })
     app.register(statsRoutes, { prefix: "/stats" })
+    app.register(reportsRoutes, { prefix: "/reports" })
 }

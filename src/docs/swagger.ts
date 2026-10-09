@@ -6,7 +6,7 @@ import {
     categoryStatsSchema,
     errorResponseSchema,
     monthInsightsSchema,
-    overviewSchema,
+    monthlyStatsSchema,
     periodSchema,
     transactionSchema,
     cashFlowSchema,
@@ -25,7 +25,8 @@ export const swaggerOptions = {
             { name: "Auth", description: "Cadastro, login e dados do usuário autenticado" },
             { name: "Categories", description: "Categorias pré-definidas do sistema, com ícone e cor" },
             { name: "Transactions", description: "Lançamentos financeiros de um mês" },
-            { name: "Stats", description: "Cash flow, overview, períodos, top categorias e insights" },
+            { name: "Stats", description: "Cash flow, comparação do mês, períodos e top categorias" },
+            { name: "Reports", description: "Dados do relatório mensal. O envio ainda não está ligado." },
         ],
         components: {
             securitySchemes: {
@@ -45,7 +46,7 @@ export const swaggerOptions = {
                 BasesStats: basesStatsSchema,
                 CategoryStats: categoryStatsSchema,
                 MonthInsights: monthInsightsSchema,
-                Overview: overviewSchema,
+                MonthlyStats: monthlyStatsSchema,
                 Period: periodSchema,
             },
         },
